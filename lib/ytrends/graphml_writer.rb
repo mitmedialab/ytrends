@@ -1,5 +1,6 @@
 require 'nokogiri'
 
+# tailored for import into gephi
 class Ytrends::GraphmlWriter
 
   def initialize
