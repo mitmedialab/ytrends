@@ -4,9 +4,7 @@ require 'open-uri'
 require 'ytrends/rank'
 
 class Ytrends::Scraper
-
-  DEBUG_MODE = true
-
+  
   def initialize
     @log = Logger.new 'log/scraper.log'
     @locations = Ytrends::locations
