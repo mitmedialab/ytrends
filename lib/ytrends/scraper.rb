@@ -13,13 +13,12 @@ class Ytrends::Scraper
   def scrape_all_countries
     @log.info "Starting to scrape"
     @locations.each do |loc|
-      next if loc.empty? # safety first!
-      loc.strip!
-      most_viewed_ids = most_viewed_rankings_for loc
-      save_rankings_to_db loc, most_viewed_ids, 'view'
-      most_shared_ids = most_shared_rankings_for loc
-      save_rankings_to_db loc, most_shared_ids, 'share'
-      @log.info '  saved: '+loc
+      loc_abbr = loc[:abbr].strip
+      most_viewed_ids = most_viewed_rankings_for loc_abbr
+      save_rankings_to_db loc_abbr, most_viewed_ids, 'view'
+      most_shared_ids = most_shared_rankings_for loc_abbr
+      save_rankings_to_db loc_abbr, most_shared_ids, 'share'
+      @log.info '  saved: '+loc_abbr
       sleep 1 # be nice to them
     end
     @log.info 'Done!'
@@ -32,11 +31,11 @@ class Ytrends::Scraper
 
   private
 
-    def save_rankings_to_db loc, video_ids, source
+    def save_rankings_to_db loc_abbr, video_ids, source
       video_ids.each_with_index do |video_id,index|
         ranking = Ytrends::Rank.new(
           :source => source,
-          :loc => loc,
+          :loc => loc_abbr,
           :rank => index+1,
           :video_id => video_id,
           :date => Date.today
@@ -45,22 +44,22 @@ class Ytrends::Scraper
       end
     end
 
-    def most_viewed_rankings_for loc
-      content = open( most_viewed_url loc ).read
+    def most_viewed_rankings_for loc_abbr
+      content = open( most_viewed_url loc_abbr ).read
       video_ids = parse_results content
     end
 
-    def most_shared_rankings_for loc
-      content = open( most_shared_url loc ).read
+    def most_shared_rankings_for loc_abbr
+      content = open( most_shared_url loc_abbr ).read
       video_ids = parse_results content
     end
 
-    def most_viewed_url loc
-      "http://www.youtube.com/trendsdashboard_ajax?action_feed_videos=1&feed=views&loc="+loc+"&gender=--&age=--"
+    def most_viewed_url loc_abbr
+      "http://www.youtube.com/trendsdashboard_ajax?action_feed_videos=1&feed=views&loc="+loc_abbr+"&gender=--&age=--"
     end
 
-    def most_shared_url loc
-      "http://www.youtube.com/trendsdashboard_ajax?action_feed_videos=1&feed=shared&loc="+loc+"&gender=--&age=--"
+    def most_shared_url loc_abbr
+      "http://www.youtube.com/trendsdashboard_ajax?action_feed_videos=1&feed=shared&loc="+loc_abbr+"&gender=--&age=--"
     end
 
 end

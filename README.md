@@ -16,12 +16,20 @@ Next setup the database
 rake db:migrate
 ```
 
-Running
--------
+Scraping
+--------
 
 To load the latest rankings from youtube, do this
 ```
 ruby -Ilib scrape-rankings.rb
+```
+
+Reporting
+---------
+
+To generate a graphml report showing connections between the countries
+```
+ruby -Ilib generate-graphml.rb
 ```
 
 Locations
