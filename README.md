@@ -30,5 +30,6 @@ Locations
 The initial list of locations was seeded by running the following JQuery statement 
 from the browser console on the YouTube Trends webpage:
 ```
-$('select[data-hash=loc0] option').map(function() { return $(this).val();}).get();
+$('select[data-hash=loc0] option').map(function() { return $(this).val()+"|"+$(this).text();}).get();
 ```
+and then cleaning it up via a few regular expressions in a text editor

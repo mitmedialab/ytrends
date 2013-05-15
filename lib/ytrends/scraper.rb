@@ -1,5 +1,4 @@
 require 'logger'
-require 'sqlite3'
 require 'open-uri'
 require 'ytrends/rank'
 

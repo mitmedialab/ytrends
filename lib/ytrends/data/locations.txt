@@ -1,137 +1,137 @@
---
-all_532
-all_524
-all_635
-all_512
-all_630
-all_506
-all_514
-all_523
-all_637
-all_519
-all_517
-all_602
-all_515
-all_510
-all_535
-all_623
-all_682
-all_751
-all_679
-all_505
-all_516
-all_563
-all_518
-all_567
-all_566
-all_533
-all_744
-all_618
-all_691
-all_527
-all_561
-all_574
-all_616
-all_839
-all_803
-all_529
-all_669
-all_640
-all_528
-all_617
-all_613
-all_686
-all_659
-all_622
-all_501
-all_544
-all_650
-all_652
-all_534
-all_504
-all_753
-all_508
-all_500
-all_820
-all_521
-all_560
-all_556
-all_538
-all_610
-all_862
-all_770
-all_641
-all_825
-all_807
-all_855
-all_819
-all_543
-all_609
-all_539
-all_789
-all_671
-all_511
-all_548
-all_678
-all_577
-dza
-arg
-aus
-aut
-bhr
-bel
-bra
-can
-chl
-col
-cze
-dnk
-egy
-fin
-fra
-deu
-gha
-grc
-hkg
-hun
-ind
-idn
-irl
-isr
-ita
-jpn
-jor
-ken
-kwt
-mys
-mex
-mar
-nld
-nzl
-nga
-nor
-omn
-per
-phl
-pol
-prt
-qat
-rou
-rus
-sau
-sen
-sgp
-svk
-zaf
-kor
-esp
-swe
-che
-twn
-tun
-tur
-uga
-ukr
-are
-gbr
-yem
+--|United States
+all_532|Albany-Schenectady-Troy, NY
+all_524|Atlanta, GA
+all_635|Austin, TX
+all_512|Baltimore, MD
+all_630|Birmingham, AL
+all_506|Boston MA, Manchester, NH
+all_514|Buffalo, NY
+all_523|Burlington VT, Plattsburgh, NY
+all_637|Cedar Rapids-Waterloo-Iowa City & Dubuque, IA
+all_519|Charleston, SC
+all_517|Charlotte, NC
+all_602|Chicago, IL
+all_515|Cincinnati, OH
+all_510|Cleveland-Akron (Canton), OH
+all_535|Columbus, OH
+all_623|Dallas-Ft. Worth, TX
+all_682|Davenport IA, Rock Island-Moline, IL
+all_751|Denver, CO
+all_679|Des Moines-Ames, IA
+all_505|Detroit, MI
+all_516|Erie, PA
+all_563|Grand Rapids-Kalamazoo-Battle Creek, MI
+all_518|Greensboro-High Point-Winston Salem, NC
+all_567|Greenville-Spartanburg SC-Asheville NC-Anderson, SC
+all_566|Harrisburg-Lancaster-Lebanon-York, PA
+all_533|Hartford & New Haven, CT
+all_744|Honolulu, HI
+all_618|Houston, TX
+all_691|Huntsville-Decatur (Florence), AL
+all_527|Indianapolis, IN
+all_561|Jacksonville, FL
+all_574|Johnstown-Altoona, PA
+all_616|Kansas City, MO
+all_839|Las Vegas, NV
+all_803|Los Angeles, CA
+all_529|Louisville, KY
+all_669|Madison, WI
+all_640|Memphis, TN
+all_528|Miami-Ft. Lauderdale, FL
+all_617|Milwaukee, WI
+all_613|Minneapolis-St. Paul, MN
+all_686|Mobile AL-Pensacola (Ft. Walton Beach), FL
+all_659|Nashville, TN
+all_622|New Orleans, LA
+all_501|New York, NY
+all_544|Norfolk-Portsmouth-Newport News, VA
+all_650|Oklahoma City, OK
+all_652|Omaha, NE
+all_534|Orlando-Daytona Beach-Melbourne, FL
+all_504|Philadelphia, PA
+all_753|Phoenix, AZ
+all_508|Pittsburgh, PA
+all_500|Portland-Auburn, ME
+all_820|Portland, OR
+all_521|Providence RI, New Bedford, MA
+all_560|Raleigh-Durham (Fayetteville), NC
+all_556|Richmond-Petersburg, VA
+all_538|Rochester, NY
+all_610|Rockford, IL
+all_862|Sacramento-Stockton-Modesto, CA
+all_770|Salt Lake City, UT
+all_641|San Antonio, TX
+all_825|San Diego, CA
+all_807|San Francisco-Oakland-San Jose, CA
+all_855|Santa Barbara-Santa Maria-San Luis Obispo, CA
+all_819|Seattle-Tacoma, WA
+all_543|Springfield-Holyoke, MA
+all_609|St. Louis, MO
+all_539|Tampa-St. Petersburg (Sarasota), FL
+all_789|Tucson (Sierra Vista), AZ
+all_671|Tulsa, OK
+all_511|Washington, DC (Hagerstown, MD)
+all_548|West Palm Beach-Ft. Pierce, FL
+all_678|Wichita-Hutchinson, KS
+all_577|Wilkes Barre-Scranton, PA
+dza|Algeria
+arg|Argentina
+aus|Australia
+aut|Austria
+bhr|Bahrain
+bel|Belgium
+bra|Brazil
+can|Canada
+chl|Chile
+col|Colombia
+cze|Czech Republic
+dnk|Denmark
+egy|Egypt
+fin|Finland
+fra|France
+deu|Germany
+gha|Ghana
+grc|Greece
+hkg|Hong Kong
+hun|Hungary
+ind|India
+idn|Indonesia
+irl|Ireland
+isr|Israel
+ita|Italy
+jpn|Japan
+jor|Jordan
+ken|Kenya
+kwt|Kuwait
+mys|Malaysia
+mex|Mexico
+mar|Morocco
+nld|Netherlands
+nzl|New Zealand
+nga|Nigeria
+nor|Norway
+omn|Oman
+per|Peru
+phl|Philippines
+pol|Poland
+prt|Portugal
+qat|Qatar
+rou|Romania
+rus|Russia
+sau|Saudi Arabia
+sen|Senegal
+sgp|Singapore
+svk|Slovakia
+zaf|South Africa
+kor|South Korea
+esp|Spain
+swe|Sweden
+che|Switzerland
+twn|Taiwan
+tun|Tunisia
+tur|Turkey
+uga|Uganda
+ukr|Ukraine
+are|United Arab Emirates
+gbr|United Kingdom
+yem|Yemen

@@ -1,5 +1,5 @@
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     actionpack (3.2.13)
       activemodel (= 3.2.13)
@@ -31,6 +31,7 @@ GEM
     json (1.8.0)
     logger (1.2.8)
     multi_json (1.7.3)
+    nokogiri (1.5.9)
     rack (1.4.5)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -68,5 +69,6 @@ PLATFORMS
 DEPENDENCIES
   activerecord
   logger
+  nokogiri
   sqlite3
   standalone_migrations

@@ -8,13 +8,27 @@ class Ytrends
 
   # caches static list of locations so they're only read in from disk once
   def self.locations
-    @@locations = File.readlines(Ytrends::LOCATIONS_CSV_PATH) if @@locations==nil
+    if @@locations.nil?
+      @@locations = []
+      File.open(Ytrends::LOCATIONS_CSV_PATH).each_line do |line|
+        line_parts = line.split("|")
+        @@locations << {
+          :abbr=>line_parts[0].strip,
+          :name=>line_parts[1].strip
+        }
+      end
+    end
     @@locations
+  end
+
+  def self.country_locations
+    self.locations.select { |loc| not loc[:abbr].start_with? 'all_' }
   end
 
 end
 
 require 'ytrends/scraper.rb'
+require 'ytrends/reporter.rb'
 
 ActiveRecord::Base.logger = Logger.new(File.open('log/database.log', 'w'))
 db_config = YAML.load_file('db/config.yml')
