@@ -3,4 +3,4 @@ require 'ytrends'
 
 reporter = Ytrends::Reporter.new
 
-reporter.graph_ml 'reports/connections.graphml'
+reporter.render_all

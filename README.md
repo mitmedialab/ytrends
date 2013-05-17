@@ -27,9 +27,9 @@ ruby -Ilib scrape-rankings.rb
 Reporting
 ---------
 
-To generate a graphml report showing connections between the countries
+To generate graphml and json reports showing connections between the countries:
 ```
-ruby -Ilib generate-graphml.rb
+ruby -Ilib write-reports.rb
 ```
 
 Locations

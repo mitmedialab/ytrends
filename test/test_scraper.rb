@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'ytrends'
 
-class YtrendsScraperTest < Test::Unit::TestCase
+class ScraperTest < Test::Unit::TestCase
 
   def setup
   end
