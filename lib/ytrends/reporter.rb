@@ -8,7 +8,7 @@ class Ytrends::Reporter
     @log = Logger.new 'log/reporter.log'
   end
 
-  def render_all
+  def render_all thresholds
     output_file_name = "reports/connections"
     @log.info "Starting to report to GraphML"
     country_locs = Ytrends::country_locations
@@ -28,9 +28,16 @@ class Ytrends::Reporter
         target_ranks = select_ranks_by_loc ranks, target_loc[:abbr]
         common_pct = common_video_pct(source_ranks, target_ranks)
         common_video_ids = common_videos(source_ranks, target_ranks)
-        graph.add_edge(source_loc[:abbr], target_loc[:abbr], 
-          {:weight=>common_pct, :pct=>common_pct, :count=> common_video_ids.length, :video_ids=>common_video_ids.join(",")}
-        )
+      
+        output_edge = true
+        output_edge = false if thresholds.include? :weight and common_pct < thresholds[:weight]
+
+        if output_edge
+          graph.add_edge(source_loc[:abbr], target_loc[:abbr], 
+            {:weight=>common_pct, :pct=>common_pct, :count=> common_video_ids.length, :video_ids=>common_video_ids.join(",")}
+          )
+        end
+        
       end
     end
 
