@@ -3,8 +3,8 @@ YouTube Trends Scraper
 
 A simple ruby library to scrape all the YouTube Trends data in to a SQLite database.
 
-Setup
------
+Installation
+------------
 
 First install the dependencies
 ```
