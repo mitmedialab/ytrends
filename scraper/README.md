@@ -1,7 +1,7 @@
-YouTube Trends Analyzer
-=======================
+YouTube Trends Scraper
+======================
 
-Playing with YouTube Trends Data
+A simple ruby library to scrape all the YouTube Trends data in to a SQLite database.
 
 Setup
 -----
@@ -24,12 +24,12 @@ To load the latest rankings from youtube, do this
 ruby -Ilib scrape-rankings.rb
 ```
 
-Reporting
----------
+Testing
+-------
 
-To generate graphml and json reports showing connections between the countries:
+To run the simple test case, do this
 ```
-ruby -Ilib write-reports.rb
+rake test
 ```
 
 Locations
