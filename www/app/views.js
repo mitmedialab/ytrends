@@ -1,16 +1,18 @@
 MapView = Backbone.View.extend({
+
     initialize: function(){
         console.log("Initialized MapView");
     },
+
     render: function(){
         console.log("rendering MapView");
         var template = _.template($('#yt-map-template').html(), {});
         this.$el.html( template );
         
-        var width = 960, height = 580;
-        var projection = d3.geo.kavrayskiy7()
-            .scale(170)
-            .translate([width / 2, height / 2])
+        var width = 960, height = 500;
+        var projection = d3.geo.mercator()
+            .scale(160)
+            .translate([460, 300])
             .precision(.1);
         var path = d3.geo.path()
             .projection(projection);
@@ -20,18 +22,38 @@ MapView = Backbone.View.extend({
         d3.json("data/world-50m.json", function(error, world) {
             var countries = topojson.feature(world, world.objects.countries).features;
 
-            svg.selectAll(".country")
-                .data(countries)
-            .enter().insert("path", ".graticule")
-                .attr("class", "country")
-                .attr("d", path)
-                .style("fill", function(d, i) { return "#333333"; });
+            var country = svg.selectAll(".yt-country").data(countries);
 
-            svg.insert("path", ".graticule")
-                .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
-                .attr("class", "boundary")
+            country.enter().insert("path", ".yt-graticule")
+                .attr("class", "yt-country")
+                .attr("id", function(d,i) {return "yt-country"+d.id})
                 .attr("d", path);
+            country.on("click",handleClick);
         });
         d3.select(self.frameElement).style("height", height + "px");
+    },
+
+    highlightCountry: function(countryId){
+        $('.yt-country').attr("class","yt-country");
+
+        var model = window.allCountries.get(countryId);
+        if(model==null){
+            console.log("No info about "+countryId);
+            return;
+        }
+        var friends = model.getTopFriendCountries(10);
+
+        // a jquery-based approach (rather than d3)
+        $('.yt-country').attr("class","yt-country yt-unrelated");
+        $('#yt-country'+countryId).attr("class","yt-country yt-selected");
+        $.each(friends, function(index,object){
+            $('#yt-country'+object['id']).attr("class","yt-country yt-related");
+        })
     }
+
 });
+
+function handleClick(e){
+    mapView.highlightCountry(e.id);
+    //window.MapView.highlightCountry()
+}

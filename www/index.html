@@ -27,14 +27,17 @@
 <script type="text/Javascript" src="lib/d3.v3.min.js"></script>
 <script type="text/Javascript" src="http://d3js.org/d3.geo.projection.v0.min.js"></script> <!-- doesn't work local for some reason -->
 <script type="text/Javascript" src="lib/topojson.v1.min.js"></script>
+<script type="text/Javascript" src="lib/queue.min.js"></script>
 
 <!-- our application code -->
+<script type="text/Javascript" src="lib/iso3166.js"></script>
 <script type="text/Javascript" src="app/models.js"></script>
 <script type="text/Javascript" src="app/views.js"></script>
 
 <script type="text/Javascript">
 $(function(){
   // load the data
+  ISO3166.initialize();
   window.allCountries = new Countries();
   allCountries.fetch({ url: "data/weights-mincut.json"});
   // make the views
