@@ -20,9 +20,9 @@ var ISO3166 = {
 		return ISO3166.numericLookup[parseInt(countryId)];
 	},
 
-	getIdFromAlpha3: function(countryAlpha3){
-		var countryInfo = ISO3166.getInfoFromAlpha3(countryAlpha3);
-		return parseInt(countryInfo['country-code']);
+	getAlpha3FromId: function(countryId){
+		var countryInfo = ISO3166.getInfoFromId(countryId);
+		return countryInfo['alpha-3'].toLowerCase();
 	},
 
 	getInfoFromAlpha3: function(countryAlpha3){
@@ -33,6 +33,11 @@ var ISO3166 = {
 			console.log("unable to find country named "+countryAlpha3);
 		}
 		return ISO3166.alpha3Lookup[countryAlpha3];
+	},
+
+	getIdFromAlpha3: function(countryAlpha3){
+		var countryInfo = ISO3166.getInfoFromAlpha3(countryAlpha3);
+		return parseInt(countryInfo['country-code']);
 	}
 
 };
