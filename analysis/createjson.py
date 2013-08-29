@@ -23,6 +23,7 @@ for rank in ranks:
     videos[rank[0]] = rank[2]
     count_by_loc[rank[1]] = videos
 
+# Create result dict (for speed)
 results = {}
 for source in count_by_loc.keys():
     for target in count_by_loc.keys():
@@ -41,5 +42,21 @@ for source in count_by_loc.keys():
             }
             results[source] = source_res
 
+# Convert to backbone-friendly list
+result_list = []
+for src, src_data in results.iteritems():
+    result = {
+        'code': src,
+        'friends': []
+    }
+    for tgt, tgt_data in src_data.iteritems():
+        friend = {
+            'code': tgt,
+            'weight': tgt_data['w'],
+            'videos': tgt_data['v']
+        }
+        result['friends'].append(friend)
+    result_list.append(result)
+
 with open('output/weights-mincut.json', 'wb') as f:
-    f.write(json.dumps(results))
+    f.write(json.dumps(result_list))
