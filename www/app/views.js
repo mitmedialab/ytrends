@@ -19,7 +19,7 @@ MapView = Backbone.View.extend({
         var svg = d3.select(this.el).append("svg")
             .attr("width", width)
             .attr("height", height);
-        d3.json("data/world-50m.json", function(error, world) {
+        d3.json("data/world-110m.json", function(error, world) {
             var countries = topojson.feature(world, world.objects.countries).features;
 
             var country = svg.selectAll(".yt-country").data(countries);
@@ -43,7 +43,7 @@ MapView = Backbone.View.extend({
         }
         var friends = model.getTopFriendCountries(10);
 
-        // a jquery-based approach (rather than d3)
+        // TODO: what's the d3 way to do this?
         $('.yt-country').attr("class","yt-country yt-unrelated");
         $('#yt-country'+countryId).attr("class","yt-country yt-selected");
         $.each(friends, function(index,object){
@@ -53,7 +53,7 @@ MapView = Backbone.View.extend({
 
 });
 
+// TODO: is there any way to do this IN the view?
 function handleClick(e){
     mapView.highlightCountry(e.id);
-    //window.MapView.highlightCountry()
 }
