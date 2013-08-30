@@ -1,7 +1,7 @@
 
 var Country = Backbone.Model.extend({
-    initialize: function(arguments){
-        this.set({'id':ISO3166.getIdFromAlpha3(arguments['code'])});
+    initialize: function(args){
+        this.set({'id':ISO3166.getIdFromAlpha3(args['code'])});
     },
     getTopFriendCountries: function(count){
         // TODO: cache this
