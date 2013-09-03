@@ -26,7 +26,11 @@ for rank in ranks:
 # Create result dict (for speed)
 results = {}
 for source in count_by_loc.keys():
+    if source == '--':
+        source = 'usa'
     for target in count_by_loc.keys():
+        if target == '--':
+            target = 'usa'
         if source == target:
             continue
         # Get distance
