@@ -7,6 +7,7 @@ MapView = Backbone.View.extend({
     disabledColor: 'rgb(240, 240, 240)',
     enabledColor: 'rgb(243,195,99)',
     selectedColor: 'rgb(170,217,241)',
+    connectionColor: 'rgb(170,217,241)',
     minColor: 'rgb(241,233,187)',
     maxColor: 'rgb(207,97,35)',
     
@@ -31,6 +32,7 @@ MapView = Backbone.View.extend({
     },
     
     initD3: function () {
+        var that = this;
         this.projection = d3.geo.mercator()
             .scale(160)
             .translate([460, 300])
@@ -42,9 +44,28 @@ MapView = Backbone.View.extend({
             .attr("height", this.height);
         this.svg.append('g').attr('id', 'yt-background');
         this.svg.append('g').attr('id', 'yt-data');
+        this.svg.append('g').attr('id', 'yt-connections');
+        this.svg.append('rect')
+            .attr('x', 0).attr('y', this.height-50).attr('width', '50').attr('height', '50')
+            .attr('fill', this.enabledColor)
+            .on('click', function () {
+                that.showConnections = !that.showConnections;
+                if (that.showConnections) {
+                    that.renderConnections();
+                } else {
+                    d3.selectAll('.connection').transition()
+                        .attr('stroke-opacity', '0')
+                        .each('end', function () { this.remove(); })
+                }
+            });
+        
+        var maxWeight = d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
         this.color = d3.scale.linear()
             .range([this.minColor, this.maxColor])
-            .domain([0, d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); }) ]);
+            .domain([0, maxWeight]);
+        this.opacity = d3.scale.linear()
+            .range([0, .5])
+            .domain([0, maxWeight]);
     },
     
     createCountryLookup: function (world) {
@@ -88,6 +109,7 @@ MapView = Backbone.View.extend({
     
     renderAll: function () {
         var that = this;
+        // Render countries
         var g = this.svg.select('#yt-data')
             .selectAll('.yt-country')
             .data(window.allCountries.models, function (d) { return d.id; });
@@ -104,8 +126,6 @@ MapView = Backbone.View.extend({
             .attr("fill", this.enabledColor)
             .attr("stroke", "rgb(255,255,255)")
             .style("opacity", "1");
-        
-
     },
 
     renderRelated: function (country) {
@@ -139,8 +159,42 @@ MapView = Backbone.View.extend({
             .attr("fill", function (d) { console.log(d.color); return d.color; });
             
         // TODO: animate arcs kind of like http://bl.ocks.org/enoex/6201948
-    }
+    },
 
+    renderConnections: function (country) {
+        var view = this;
+        // Create data set of country pairs
+        var data = [];
+        if (typeof(country) == 'undefined') {
+            $.each(window.allCountries.models, function (i, a) {
+                $.each(a.getTopFriendCountries(), function (i, b) {
+                    if (a.id < b.id)
+                    data.push({
+                        'id': a.id + ':' + b.id,
+                        'from': view.projection(Centroid.getCentroidFromAlpha3(ISO3166.getAlpha3FromId(a.id))),
+                        'to': view.projection(Centroid.getCentroidFromAlpha3(ISO3166.getAlpha3FromId(b.id))),
+                        'weight': b.weight
+                    })
+                });
+            });
+        }
+        // Render connections
+        var g = this.svg.select('#yt-connections');
+        group = g.selectAll('.connection').data(data, function (d) { return d.id; });
+        group.enter().append('line')
+            .attr('class', 'connection')
+            .attr('x1', function (d) { return d.from[0]; })
+            .attr('x2', function (d) { return d.to[0]; })
+            .attr('y1', function (d) { return d.from[1]; })
+            .attr('y2', function (d) { return d.to[1]; })
+            .attr('stroke', this.connectionColor)
+            .attr('stroke-width', '2')
+            .attr('stroke-opacity', '0');
+        group.exit().remove();
+        group.transition()
+            .attr('stroke-opacity', function (d) { return view.opacity(d.weight); } )
+    }
+    
 });
 
 VideoListView = Backbone.View.extend({
