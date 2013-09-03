@@ -81,7 +81,7 @@ MapView = Backbone.View.extend({
         var countryElem = $('#yt-country'+country.id);
         console.log('Clicked ' + country.id);
 
-        // click on first country, or unrelated one
+        // click on first country
         if(!this.selected) {
             this.selected = country;
             this.renderRelated(country);
@@ -93,6 +93,7 @@ MapView = Backbone.View.extend({
         } else {
             this.selected = null;
             this.renderAll();
+            $('#yt-video-list-container').html('');
         }
 
     },
