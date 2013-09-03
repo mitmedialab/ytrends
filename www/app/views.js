@@ -87,6 +87,7 @@ MapView = Backbone.View.extend({
             this.renderRelated(country);
         //clicked on related country
         } else if(country.id !== this.selected.id) {
+            this.updateRelated(country);
             var videos = this.selected.getVideosInCommonWith(country.id);
             window.videoListView = new VideoListView({ el: $('#yt-video-list-container'), videoIds: videos});
         } else {
@@ -158,6 +159,17 @@ MapView = Backbone.View.extend({
         // TODO: animate arcs kind of like http://bl.ocks.org/enoex/6201948
     },
 
+    updateRelated: function (country) {
+        this.svg.select('#yt-data').selectAll('.yt-country')
+            .transition()
+            .attr('stroke', '#fff')
+            .attr('stroke-width', '1');
+        this.svg.select('#yt-country' + country.id)
+            .transition()
+            .attr('stroke', this.selectedColor)
+            .attr('stroke-width', '2');
+    },
+    
     renderConnections: function (country) {
         var view = this;
         // Create data set of country pairs
