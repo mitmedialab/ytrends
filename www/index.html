@@ -30,6 +30,9 @@
   </div>
 </div>
 
+<div id="yt-video-modal" class="modal fade">
+</div>
+
 <!-- where the content goes -->
 <div class="container">
   <div id="yt-map-container">
@@ -43,17 +46,28 @@
 </script>
 <script type="text/template" id="yt-video-list-template">
 <div class="well">
-  <h3><%=country1%> and <%=country2%> both love these videos:<h3>
+  <h3><%=country1%> and <%=country2%> both watch these videos:<h3>
   <div class="yt-video-item-list row">
   </div>
 </div>
 </script>
 <script type="text/template" id="yt-video-item-template">
 <div class="col-sm-4 col-md-2">
-  <a href="http://www.youtube.com/watch?v=<%=videoId%>" class="thumbnail" target="_blank">
-    <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" />
-  </a>
+  <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
 </div>
+</script>
+<script type="text/template" id="yt-full-video-template">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title"><%=country1%> and <%=country2%> both watch this</h4>
+      </div>
+      <div class="modal-body">
+        <iframe width="560" height="315" src="http://www.youtube.com/embed/<%=videoId%>?rel=0" frameborder="0" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
 </script>
 
 <!-- all the JS includes -->

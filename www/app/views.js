@@ -228,18 +228,48 @@ VideoListView = Backbone.View.extend({
         this.$el.html( template );
 
         for(var i=0;i<this.options.videoIds.length;i++){
-            $('.yt-video-item-list', this.$el).append( (new VideoItemView({videoId:this.options.videoIds[i]})).el );
+            $('.yt-video-item-list', this.$el).append( (new VideoItemView({
+                videoId:this.options.videoIds[i],
+                country1: this.options.country1,
+                country2: this.options.country2
+            })).el );
         }
     }
 });
 
 VideoItemView = Backbone.View.extend({
+    events: {
+        "click img"   : "showVideo",
+    },
     initialize: function(){
         this.render();
     },
     render: function(){
         console.log("rendering VideoItemView");
         var template = _.template($('#yt-video-item-template').html(), {videoId: this.options.videoId});
+        this.$el.html( template );
+    },
+    showVideo: function(evt){
+        console.log(evt.target);
+        new FullVideoView({el: $('#yt-video-modal'), 
+            country1: this.options.country1,
+            country2: this.options.country2,
+            videoId: $(evt.target).attr('data-video-id')});
+    }
+});
+
+FullVideoView = Backbone.View.extend({
+    initialize: function(){
+        this.render();
+        this.$el.modal();
+    },
+    render: function(){
+        console.log("rendering FullVideoView "+this.options.videoId);
+        var template = _.template($('#yt-full-video-template').html(), {
+            videoId: this.options.videoId,
+            country1: this.options.country1,
+            country2: this.options.country2
+        });
         this.$el.html( template );
     }
 });

@@ -26,3 +26,7 @@ body {
 .yt-video-item-list > div > div {
 	margin-bottom: 10px;
 }
+
+#yt-video-modal .modal-dialog {
+	width: 620px;
+}
