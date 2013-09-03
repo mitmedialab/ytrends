@@ -1,8 +1,8 @@
 MapView = Backbone.View.extend({
 
     // Configuration
-    width: 960,
-    height: 500,
+    width: 1170,
+    height: 565,
     // see http://www.colourlovers.com/palette/125988/Artificial_Growth
     disabledColor: 'rgb(240, 240, 240)',
     enabledColor: 'rgb(243,195,99)',
@@ -34,8 +34,8 @@ MapView = Backbone.View.extend({
     initD3: function () {
         var that = this;
         this.projection = d3.geo.mercator()
-            .scale(160)
-            .translate([460, 300])
+            .scale(181)
+            .translate([570, 350])
             .precision(.1);
         this.path = d3.geo.path()
             .projection(this.projection);
@@ -90,7 +90,11 @@ MapView = Backbone.View.extend({
         } else if(country.id !== this.selected.id) {
             this.updateRelated(country);
             var videos = this.selected.getVideosInCommonWith(country.id);
-            window.videoListView = new VideoListView({ el: $('#yt-video-list-container'), videoIds: videos});
+            window.videoListView = new VideoListView({ el: $('#yt-video-list-container'), 
+                country1: ISO3166.getNameFromId(this.selected.id),
+                country2: ISO3166.getNameFromId(country.id),
+                videoIds: videos
+            });
         } else {
             this.selected = null;
             this.renderAll();
@@ -217,11 +221,14 @@ VideoListView = Backbone.View.extend({
     },
     render: function(){
         console.log("rendering VideoListView");
-        var template = _.template($('#yt-video-list-template').html(), {videoCount: this.options.videoIds.length});
+        var template = _.template($('#yt-video-list-template').html(), {
+            country1: this.options.country1,
+            country2: this.options.country2
+        });
         this.$el.html( template );
 
         for(var i=0;i<this.options.videoIds.length;i++){
-            $('.video-item-list', this.$el).append( (new VideoItemView({videoId:this.options.videoIds[i]})).el );
+            $('.yt-video-item-list', this.$el).append( (new VideoItemView({videoId:this.options.videoIds[i]})).el );
         }
     }
 });

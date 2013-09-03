@@ -1,5 +1,14 @@
 /* see http://www.colourlovers.com/palette/125988/Artificial_Growth */
 
+body {
+	margin-top: 10px;
+}
+
+#yt-map-container{
+	border: 1px solid #eee;
+	border-radius: 10px;
+}
+
 #yt-background > .yt-country {
 	fill: #eee;
 	stroke: rgb(255,255,255);
@@ -7,4 +16,13 @@
 }
 
 #yt-data .yt-country {
+}
+
+#yt-video-list-container h3 {
+	margin-top: 0px;
+	padding-top: 0px;
+}
+
+.yt-video-item-list > div > div {
+	margin-bottom: 10px;
 }

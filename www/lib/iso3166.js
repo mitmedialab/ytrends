@@ -25,6 +25,11 @@ var ISO3166 = {
 		return countryInfo['alpha-3'].toLowerCase();
 	},
 
+	getNameFromId: function(countryId){
+		var countryInfo = ISO3166.getInfoFromId(countryId);
+		return countryInfo['name'];
+	},
+
 	getInfoFromAlpha3: function(countryAlpha3){
 		if (countryAlpha3=="--"){
 			countryAlpha3 = 'usa';	// HACK for scraped google data
