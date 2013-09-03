@@ -4,6 +4,7 @@ var Country = Backbone.Model.extend({
         this.set({'id':ISO3166.getIdFromAlpha3(args['code'])});
     },
     getTopFriendCountries: function(count){
+        console.log(this);
         // TODO: cache this
         var sortedFriends = this.get('friends').sort(function(a,b){return b.weight-a.weight});
         var topFriends = sortedFriends.slice(0,count);

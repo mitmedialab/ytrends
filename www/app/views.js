@@ -83,16 +83,13 @@ MapView = Backbone.View.extend({
 
         // click on first country, or unrelated one
         if(!this.selected) {
-            console.log('Selecting');
             this.selected = country;
             this.renderRelated(country);
         //clicked on related country
         } else if(country.id !== this.selected.id) {
-            console.log('Related');
             var videos = this.selected.getVideosInCommonWith(country.id);
             window.videoListView = new VideoListView({ el: $('#yt-video-list-container'), videoIds: videos});
         } else {
-            console.log('Deselecting');
             this.selected = null;
             this.renderAll();
         }
@@ -156,7 +153,7 @@ MapView = Backbone.View.extend({
             .remove();
         countries
             .transition()
-            .attr("fill", function (d) { console.log(d.color); return d.color; });
+            .attr("fill", function (d) { return d.color; });
             
         // TODO: animate arcs kind of like http://bl.ocks.org/enoex/6201948
     },

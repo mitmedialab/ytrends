@@ -26,25 +26,27 @@ for rank in ranks:
 # Create result dict (for speed)
 results = {}
 for source in count_by_loc.keys():
+    s = source
     if source == '--':
-        source = 'usa'
+        s = 'usa'
     for target in count_by_loc.keys():
+        t = target
         if target == '--':
-            target = 'usa'
+            t = 'usa'
         if source == target:
             continue
         # Get distance
         videos = set(count_by_loc[source].keys()).\
             intersection(set(count_by_loc[target].keys()))
         weights = [(v, min(count_by_loc[source][v], count_by_loc[target][v])) for v in videos]
-        source_res = results.get(source, {})
+        source_res = results.get(s, {})
         weight = sum([w[1] for w in weights])
         if weight > 0:
-            source_res[target] = {
+            source_res[t] = {
                 'w': weight,
                 'v': [w[0] for w in sorted(weights, key=lambda x: x[1], reverse=True)][0:10]
             }
-            results[source] = source_res
+            results[s] = source_res
 
 # Convert to backbone-friendly list
 result_list = []
