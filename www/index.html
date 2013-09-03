@@ -9,9 +9,29 @@
   </head>
   <body>
 
+<div id="yt-welcome" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">What We Watch</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+        This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights 
+        other countries where people watch the same videos.  The darker the country, the more they watch 
+        the same thing.  Click one of those countries and you can see the actual videos that people watch in both!
+        </p>
+        <p>
+        Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available
+        on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- where the content goes -->
 <div class="container">
-  <h1>What We Watch</h1>
   <div id="yt-map-container">
   </div>
   <div id="yt-video-list-container">
@@ -64,6 +84,7 @@ $(function(){
       window.mapView = new MapView({ el: $("#yt-map-container") });
     }
   });
+  $('#yt-welcome').modal();
 });
 </script>
 
