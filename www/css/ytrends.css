@@ -1,17 +1,10 @@
 /* see http://www.colourlovers.com/palette/125988/Artificial_Growth */
 
-.yt-country {
-	fill: rgb(243,195,99);
+#yt-background > .yt-country {
+	fill: #eee;
 	stroke: rgb(255,255,255);
 	stroke-width: 1px;
 }
 
-.yt-unrelated {
-	fill: rgb(241,233,187);
-}
-.yt-selected {
-	fill: rgb(201,44,44);
-}
-.yt-related {
-	fill: rgb(207,97,35);
+#yt-data .yt-country {
 }

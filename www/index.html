@@ -10,22 +10,31 @@
   <body>
 
 <!-- where the content goes -->
-<h1>What We Watch</h1>
-<div id="yt-map-container">
-</div>
-<div id="yt-video-list-container">
+<div class="container">
+  <h1>What We Watch</h1>
+  <div id="yt-map-container">
+  </div>
+  <div id="yt-video-list-container">
+  </div>
 </div>
 
 <!-- templates -->
 <script type="text/template" id="yt-map-template">
 </script>
 <script type="text/template" id="yt-video-list-template">
-We found <%=videoCount%> videos in common:
+<p>We found <%=videoCount%> videos in common:<p>
+<div class="well">
+  <div class="video-item-list row">
+  </div>
+</div>
 </script>
 <script type="text/template" id="yt-video-item-template">
-<a href="http://www.youtube.com/watch?v=<%=videoId%>"><%=videoId%></a>
+<div class="col-sm-4 col-md-2">
+  <a href="http://www.youtube.com/watch?v=<%=videoId%>" class="thumbnail" target="_blank">
+    <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" />
+  </a>
+</div>
 </script>
-
 
 <!-- all the JS includes -->
 <script type="text/Javascript" src="lib/jquery-1.10.2.min.js"></script>
@@ -47,9 +56,13 @@ $(function(){
   // load the data
   ISO3166.initialize();
   window.allCountries = new Countries();
-  allCountries.fetch({ url: "data/weights-mincut.json"});
-  // make the views
-  window.mapView = new MapView({ el: $("#yt-map-container") });
+  allCountries.fetch({
+    url: "data/weights-mincut.json",
+    success: function (collection, response, options) {
+      // make the views
+      window.mapView = new MapView({ el: $("#yt-map-container") });
+    }
+  });
 });
 </script>
 
