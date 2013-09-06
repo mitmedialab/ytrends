@@ -49,7 +49,7 @@ MapView = Backbone.View.extend({
         this.svg.append('g').attr('id', 'yt-background');
         this.svg.append('g').attr('id', 'yt-data');
         this.svg.append('g').attr('id', 'yt-connections');
-        this.svg.append('rect')
+        /*this.svg.append('rect')
             .attr('x', 0).attr('y', this.height-50).attr('width', '50').attr('height', '50')
             .attr('fill', this.enabledColor)
             .on('click', function () {
@@ -61,7 +61,7 @@ MapView = Backbone.View.extend({
                         .attr('stroke-opacity', '0')
                         .each('end', function () { this.remove(); })
                 }
-            });
+            });*/
         
         var maxWeight = d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
         console.log('Global max weight: ' + maxWeight);
