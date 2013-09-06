@@ -30,3 +30,13 @@ body {
 #yt-video-modal .modal-dialog {
 	width: 620px;
 }
+
+#yt-alert {
+	width: 350px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	text-align: center;
+	padding: 10px;
+	font-size: small;
+}

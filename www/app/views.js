@@ -10,6 +10,10 @@ MapView = Backbone.View.extend({
     connectionColor: 'rgb(170,217,241)',
     minColor: 'rgb(241,233,187)',
     maxColor: 'rgb(207,97,35)',
+
+    events: {
+        "click    svg": 'handleMapBackgroundClick'
+    },
     
     initialize: function(){
         console.log("Initialized MapView");
@@ -23,7 +27,7 @@ MapView = Backbone.View.extend({
         this.$el.html( template );
         // Load and render geography
         d3.json("data/world-110m.json", function(error, world) {
-            that.initD3()
+            that.initD3();
             that.createCountryLookup(world);
             that.renderBackground(world);
             that.renderAll();
@@ -77,8 +81,23 @@ MapView = Backbone.View.extend({
             that.countryLookup[d.id] = d;
         });
     },
-    
+
+    handleMapBackgroundClick: function(evt){
+        this.resetSelection();
+    },
+
+    handleNoDataCountryClick: function(country){
+        d3.event.stopPropagation();
+        console.log('Clicked ' + country.id + ' (no data)');
+        var countryName = ISO3166.getNameFromId(country.id);
+        new AlertView({el: $('#yt-alert'), 
+            msg: "Sorry, we don't know what people in "+countryName+" watch.",
+            position: [d3.event.offsetX, d3.event.offsetY]
+        });
+    },
+
     handleCountryClick: function(country){
+        d3.event.stopPropagation();
         var countryElem = $('#yt-country'+country.id);
         console.log('Clicked ' + country.id);
 
@@ -96,18 +115,23 @@ MapView = Backbone.View.extend({
                 videoIds: videos
             });
         } else {
-            this.selected = null;
-            this.renderAll();
-            $('#yt-video-list-container').html('');
+            this.resetSelection();
         }
-
     },
     
+    resetSelection: function(){
+        this.selected = null;
+        this.renderAll();
+        $('#yt-video-list-container').html('');
+    },
+
     renderBackground: function (world) {
+        var that = this;
         var countries = topojson.feature(world, world.objects.countries).features;
         var country = this.svg.select('#yt-background').selectAll(".yt-country").data(countries);
         country.enter().append("path")
             .attr("class", 'yt-country')
+            .on("click", function (d) { return that.handleNoDataCountryClick(d); })
             .attr("d", this.path);
     },
     
@@ -186,13 +210,14 @@ MapView = Backbone.View.extend({
         if (typeof(country) == 'undefined') {
             $.each(window.allCountries.models, function (i, a) {
                 $.each(a.getTopFriendCountries(), function (i, b) {
-                    if (a.id < b.id)
-                    data.push({
-                        'id': a.id + ':' + b.id,
-                        'from': view.projection(Centroid.getCentroidFromAlpha3(ISO3166.getAlpha3FromId(a.id))),
-                        'to': view.projection(Centroid.getCentroidFromAlpha3(ISO3166.getAlpha3FromId(b.id))),
-                        'weight': b.weight
-                    })
+                    if (a.id < b.id) {
+                        data.push({
+                            'id': a.id + ':' + b.id,
+                            'from': view.projection(a.get('centroid')),
+                            'to': view.projection(Centroid.getCentroidFromAlpha3( ISO3166.getAlpha3FromId(b.id) )),
+                            'weight': b.weight
+                        })
+                    }
                 });
             });
         }
@@ -271,5 +296,32 @@ FullVideoView = Backbone.View.extend({
             country2: this.options.country2
         });
         this.$el.html( template );
+    }
+});
+
+var lastAlertTimeout = null;
+AlertView = Backbone.View.extend({
+    initialize: function(){
+        this.render();
+    },
+    render: function(){
+        console.log("rendering AlertView ");
+        if(lastAlertTimeout!=null) {
+            clearTimeout(lastAlertTimeout);
+        }
+        var template = _.template($('#yt-alert-template').html(), {
+            msg: this.options.msg
+        });
+        this.$el.html( template )
+            .offset({ 
+                top: this.options.position[1] - this.$el.height()/2, 
+                left: this.options.position[0] - this.$el.width()/2
+                })
+            .css('opacity',1)
+            .show();
+        var that = this;
+        lastAlertTimeout = window.setTimeout(function() {
+            that.$el.fadeTo(200, 0);
+        }, 1000);
     }
 });
