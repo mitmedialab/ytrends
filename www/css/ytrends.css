@@ -40,3 +40,7 @@ body {
 	padding: 10px;
 	font-size: small;
 }
+
+.yt-video-item-list img {
+	cursor: pointer;
+}
