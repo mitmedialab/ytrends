@@ -39,18 +39,14 @@
 
 </div>
 
-
 <!-- templates -->
 <script type="text/template" id="yt-map-template">
 </script>
-<script type="text/template" id="yt-video-list-template">
-  <div class="panel-heading"><h2>... and <%=country2%> watch:<h2></div>
-  <div class="panel-body"><div class="yt-video-item-list row">
-  </div></div>
-</script>
-<script type="text/template" id="yt-video-item-template">
-  <div class="col-md-3">
-    <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
+<script type="text/template" id="yt-connection-info-template">
+  <div class="panel-heading"><h2>... and <%=country2%><h2></div>
+  <div class="panel-body">
+    <div class="row"><div class="col-md-12"><p><b><%=percent%>%</b> of the top videos watched in <%=country1%> are also watched in <%=country2%>.</p></div></div>
+    <div class="row"><div class="col-md-12"><ul class="yt-video-item-list"></ul></div></div>
   </div>
 </script>
 <script type="text/template" id="yt-full-video-template">
@@ -58,9 +54,10 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title"><%=country1%> and <%=country2%> both watch this</h4>
+        <h4 class="modal-title"><%=title%></h4>
       </div>
       <div class="modal-body">
+        <p><%=summary%></p>
         <iframe width="560" height="315" src="http://www.youtube.com/embed/<%=videoId%>?rel=0" frameborder="0" allowfullscreen></iframe>
       </div>
     </div>
@@ -71,7 +68,13 @@
 </script>
 <script type="text/template" id="yt-info-box-template">
   <div class="panel-heading"><h2><%=title%></h2></div>
-  <div class="panel-body"><%=content%></div>
+  <div class="panel-body">
+    <div class="row"><div class="col-md-12"><%=content%></div></div>
+    <div class="row"><div class="col-md-12"><ul class="yt-video-item-list"></ul></div></div>
+  </div>
+</script>
+<script type="text/template" id="yt-video-item-template">
+  <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
 </script>
 
 <!-- all the JS includes -->

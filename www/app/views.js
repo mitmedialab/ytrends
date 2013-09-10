@@ -89,7 +89,6 @@ MapView = Backbone.View.extend({
     handleInvalidCountryClick: function(country){
         console.log('Clicked ' + country.id + ' (no data)');
         var countryName = ISO3166.getNameFromId(country.id);
-        console.log(d3.event);
         // support for firefox
         var x = d3.event.offsetX;
         if (x == undefined) {
@@ -101,7 +100,7 @@ MapView = Backbone.View.extend({
         }
         // show an alert 
         new AlertView({el: $('#yt-alert'), 
-            msg: "Sorry, we don't know what people in "+countryName+" watch.",
+            msg: "Sorry, we don't know what people in "+countryName+" watched",
             position: [x, y]
         });
         d3.event.stopPropagation();
@@ -116,7 +115,7 @@ MapView = Backbone.View.extend({
         if(!this.selected) {
             this.selected = country;
             // show info about country
-            new InfoBoxView({ el: $("#yt-info-box"), country: country});
+            new InfoBoxView({ el: $("#yt-info-box"), country: this.selected});
             // update map with related
             //this._showCountryName(country.id);
             this.renderRelated(country);
@@ -129,6 +128,7 @@ MapView = Backbone.View.extend({
                 el: $('#yt-connection-info'), 
                 country1: ISO3166.getNameFromId(this.selected.id),
                 country2: ISO3166.getNameFromId(country.id),
+                percent: this.selected.getPercentInCommonWith(country.id),
                 videoIds: videos
             });
         } else {
@@ -149,7 +149,7 @@ MapView = Backbone.View.extend({
         this.selected = null;
         this.renderAll();
         this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
-        $('#yt-connection-info').fadeOut();
+        $('#yt-connection-info').hide();
         InfoBoxView.Welcome();
 
     },
@@ -293,12 +293,13 @@ ConnectionInfoView = Backbone.View.extend({
     },
     render: function(){
         console.log("rendering ConnectionInfoView");
-        var template = _.template($('#yt-video-list-template').html(), {
+        var template = _.template($('#yt-connection-info-template').html(), {
             country1: this.options.country1,
-            country2: this.options.country2
+            country2: this.options.country2,
+            percent: this.options.percent*100
         });
         this.$el.html( template );
-
+        // and add in the videos
         for(var i=0;i<this.options.videoIds.length;i++){
             $('.yt-video-item-list', this.$el).append( (new VideoItemView({
                 videoId:this.options.videoIds[i],
@@ -306,11 +307,12 @@ ConnectionInfoView = Backbone.View.extend({
                 country2: this.options.country2
             })).el );
         }
-        this.$el.fadeIn();
+        this.$el.show();
     }
 });
 
 VideoItemView = Backbone.View.extend({
+    tagName: "li",
     events: {
         "click img"   : "showVideo",
     },
@@ -319,13 +321,17 @@ VideoItemView = Backbone.View.extend({
     },
     render: function(){
         console.log("rendering VideoItemView");
-        var template = _.template($('#yt-video-item-template').html(), {videoId: this.options.videoId});
+        var template = _.template($('#yt-video-item-template').html(), {
+            videoId: this.options.videoId,
+            dayCount: this.options.dayCount
+        });
         this.$el.html( template );
     },
     showVideo: function(evt){
         new FullVideoView({el: $('#yt-video-modal'), 
             country1: this.options.country1,
             country2: this.options.country2,
+            dayCount: this.options.dayCount,
             videoId: $(evt.target).attr('data-video-id')});
     }
 });
@@ -337,10 +343,18 @@ FullVideoView = Backbone.View.extend({
     },
     render: function(){
         console.log("rendering FullVideoView "+this.options.videoId);
+        var t="", s="";
+        if(this.options.country2!=null) {
+            t = this.options.country1+" and "+this.options.country2+" both watched this";
+            s = "";
+        } else {
+            t = this.options.country1.get("name")+" watched this";
+            s = "This was on the top watched list for "+this.options.dayCount+" days.";
+        }
         var template = _.template($('#yt-full-video-template').html(), {
-            videoId: this.options.videoId,
-            country1: this.options.country1,
-            country2: this.options.country2
+            title: t,
+            summary: s,
+            videoId: this.options.videoId
         });
         this.$el.html( template );
         this.$el.on('hide.bs.modal',function(){  // make sure video stops playing when modal is closed
@@ -386,7 +400,12 @@ InfoBoxView = Backbone.View.extend({
         if('country' in this.options){
             t = this.options.country.get("name")+"...";
             var countryNames = _.map(this.options.country.getTopFriendCountries(5),function(info){ return info.name; });
-            c = "People in "+this.options.country.get("name")+" watch a lot of the same videos as people in "+_.initial(countryNames).join(", ")+" and "+_.last(countryNames)+".";
+            c = "<p>People in "+this.options.country.get("name")+" watched a lot of the same videos as people in:<ul>";
+            _.each(this.options.country.getTopFriendCountries(5), function(info){
+                c+= "<li>"+info.name+" <small class='light'>"+Math.round(100*info.percent)+"%</small></li>";
+            });
+            c+= "</ul></p>";
+            c+= "<p>Here are the top videos watched in "+this.options.country.get("name")+":</p>";
         } else {
             t = this.options.title;
             c = this.options.content;
@@ -394,13 +413,26 @@ InfoBoxView = Backbone.View.extend({
         var template = _.template($('#yt-info-box-template').html(), {
             title: t, content: c
         });
-        this.$el.html( template ).fadeIn();
+        this.$el.html( template );
+        if('country' in this.options){
+            // and add in the videos
+            var videos = this.options.country.get('videos');
+            console.log(videos);
+            for(var i=0;i<Math.min(videos.length,6);i++){
+                $('.yt-video-item-list', this.$el).append( (new VideoItemView({
+                    videoId: videos[i][0],
+                    dayCount: videos[i][1],
+                    country1: this.options.country
+                })).el );
+            }
+        }
+        this.$el.fadeIn();  // do a fade here so it matches the countries fade in
     }
 });
 InfoBoxView.Welcome = function(){
     new InfoBoxView({ 
         el: $("#yt-info-box"), 
         title: "Explore the Map",
-        content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watch the same videos.  The darker the country, the more they watch the same thing.  Click one of those countries and you can see the actual videos that people watch in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
+        content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watched the same videos.  The darker the country, the more they watched the same thing.  Click one of those countries and you can see the actual videos that people watched in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
     });
-}
+};

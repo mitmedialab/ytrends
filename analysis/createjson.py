@@ -1,4 +1,5 @@
 from operator import itemgetter
+import sys
 import json
 import sqlalchemy
 import networkx as nx
@@ -43,21 +44,27 @@ for source in count_by_loc.keys():
         weight = sum([w[1] for w in weights])
         if weight > 0:
             source_res[t] = {
+                'p': float(len(videos)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(weights, key=lambda x: x[1], reverse=True)][0:10]
+                'v': [w[0] for w in sorted(weights, key=lambda x: x[1], reverse=True)][0:20]
             }
             results[s] = source_res
 
 # Convert to backbone-friendly list
 result_list = []
 for src, src_data in results.iteritems():
+    s = src
+    if s == 'usa':
+        s = "--"
     result = {
         'code': src,
+        'videos': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20],
         'friends': []
     }
     for tgt, tgt_data in src_data.iteritems():
         friend = {
             'code': tgt,
+            'percent': str(round( tgt_data['p'], 2)),
             'weight': tgt_data['w'],
             'videos': tgt_data['v']
         }

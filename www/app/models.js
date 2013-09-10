@@ -18,6 +18,16 @@ var Country = Backbone.Model.extend({
         }
         return topFriends;
     },
+    getPercentInCommonWith: function(countryId){
+        var friendCountryAlpha3 = ISO3166.getAlpha3FromId(countryId);
+        var friends = this.get('friends');
+        for(i=0;i<friends.length;i++){
+            if(friends[i].code==friendCountryAlpha3){
+                return friends[i].percent;
+            }
+        }
+        return 0;  // nothing in common
+    },
     getVideosInCommonWith: function(countryId){
         var friendCountryAlpha3 = ISO3166.getAlpha3FromId(countryId);
         var friends = this.get('friends');

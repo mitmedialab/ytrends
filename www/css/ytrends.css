@@ -79,6 +79,19 @@ h4 {
 	position: absolute;
 	top: 540px;
 	left: 420px;
-	width: 600px;
+	width: 635px;
 	box-shadow: 3px 3px 4px rgba(92,72,58,0.5);	
+}
+
+small.light {
+	color: #bbb;
+}
+
+ul.yt-video-item-list {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+ul.yt-video-item-list li {
+	display: inline-block;
 }
