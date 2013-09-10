@@ -1,3 +1,6 @@
+from __future__ import division
+
+import math
 from operator import itemgetter
 import sys
 import json
@@ -28,6 +31,7 @@ ranks = session.query(Rank.video_id, Rank.loc, sqlalchemy.sql.func.count('*').la
     filter_by(source='view').\
     group_by(Rank.video_id, Rank.loc)
 
+# Create dict with counts (location -> video id -> count)
 count_by_loc = {}
 for rank in ranks:
     videos = count_by_loc.get(rank[1], {})
@@ -35,7 +39,9 @@ for rank in ranks:
     count_by_loc[rank[1]] = videos
 
 # Create result dict (for speed)
-results = {}
+jaccard = {}
+bhattacharyya = {}
+count = {}
 for source in count_by_loc.keys():
     s = source
     if source == '--':
@@ -46,41 +52,82 @@ for source in count_by_loc.keys():
             t = 'usa'
         if source == target:
             continue
-        # Get distance
-        videos = set(count_by_loc[source].keys()).\
+        # Calculate intersection and union
+        intersection = set(count_by_loc[source].keys()).\
             intersection(set(count_by_loc[target].keys()))
-        weights = [(v, min(count_by_loc[source][v], count_by_loc[target][v])) for v in videos]
-        source_res = results.get(s, {})
-        weight = sum([w[1] for w in weights])
+        union = set(count_by_loc[source].keys()).\
+            union(set(count_by_loc[target].keys()))
+        
+        # Calculate naive count of videos in common
+        source_res = count.get(s, {})
+        weight = len(intersection)
+        intersection_weights = [(v, min(count_by_loc[source][v], count_by_loc[target][v])) for v in intersection]
         if weight > 0:
             source_res[t] = {
-                'p': float(len(videos)) / float(len(count_by_loc[source])),
+                'p': float(len(intersection)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(weights, key=lambda x: x[1], reverse=True)][0:20]
+                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10]
             }
-            results[s] = source_res
+            count[s] = source_res
+        
+        # Calculate jaccard coefficient |A intersect B| / |A union B|
+        intersection_weights = [(v, min(count_by_loc[source][v], count_by_loc[target][v])) for v in intersection]
+        union_weights = [(v, max(count_by_loc[source].get(v, 0), count_by_loc[target].get(v, 0))) for v in union]
+        normalization = 1 / sum([w[1] for w in union_weights])
+        weight = sum([w[1] for w in intersection_weights]) * normalization
+        source_res = jaccard.get(s, {})
+        if weight > 0:
+            source_res[t] = {
+                'p': float(len(intersection)) / float(len(count_by_loc[source])),
+                'w': weight,
+                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10]
+            }
+            jaccard[s] = source_res
+            
+        # Calculate bhattacharyya coefficient
+        normalization = 1 / 10 # 10 videos per day
+        intersection_weights = [
+            (v, math.sqrt(
+                count_by_loc[source][v]/day_count_by_country[source]
+                * count_by_loc[target][v]/day_count_by_country[target])
+            ) for v in intersection
+        ]
+        weight = normalization * sum(w[1] for w in intersection_weights)
+        source_res = bhattacharyya.get(s, {})
+        if weight > 0:
+            source_res[t] = {
+                'p': float(len(intersection)) / float(len(count_by_loc[source])),
+                'w': weight,
+                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10]
+            }
+            bhattacharyya[s] = source_res
 
-# Convert to backbone-friendly list
-result_list = []
-for src, src_data in results.iteritems():
-    s = src
-    if s == 'usa':
-        s = "--"
-    result = {
-        'days': day_count_by_country[s],
-        'code': src,
-        'videos': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20],
-        'friends': []
-    }
-    for tgt, tgt_data in src_data.iteritems():
-        friend = {
-            'code': tgt,
-            'percent': str(round( tgt_data['p'], 2)),
-            'weight': tgt_data['w'],
-            'videos': tgt_data['v']
+def write_results (results, name):
+    # Convert to backbone-friendly list
+    result_list = []
+    for src, src_data in results.iteritems():
+        s = src
+        if s == 'usa':
+            s = "--"
+        result = {
+            'days': day_count_by_country[s],
+            'code': src,
+            'videos': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20],
+            'friends': []
         }
-        result['friends'].append(friend)
-    result_list.append(result)
-
-with open('output/weights-mincut.json', 'wb') as f:
-    f.write(json.dumps(result_list))
+        for tgt, tgt_data in src_data.iteritems():
+            friend = {
+                'code': tgt,
+                'percent': str(round( tgt_data['p'], 2)),
+                'weight': tgt_data['w'],
+                'videos': tgt_data['v']
+            }
+            result['friends'].append(friend)
+        result_list.append(result)
+    
+    with open('output/weights-%s.json' % (name), 'wb') as f:
+        f.write(json.dumps(result_list))
+        
+write_results(count, 'count')
+write_results(jaccard, 'jaccard')
+write_results(bhattacharyya, 'bhattacharyya')
