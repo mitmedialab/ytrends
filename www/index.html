@@ -43,7 +43,7 @@
 <script type="text/template" id="yt-map-template">
 </script>
 <script type="text/template" id="yt-connection-info-template">
-  <div class="panel-heading"><h2>... and <%=country2%><h2></div>
+  <div class="panel-heading"><h2>... and <%=country2%></h2></div>
   <div class="panel-body">
     <div class="row"><div class="col-md-12"><p><b><%=percent%>%</b> of the top videos watched in <%=country1%> are also watched in <%=country2%>.</p></div></div>
     <div class="row"><div class="col-md-12"><ul class="yt-video-item-list"></ul></div></div>
@@ -101,7 +101,7 @@ $(function(){
     url: "data/weights-mincut.json",
     success: function (collection, response, options) {
       // make the views
-      window.mapView = new MapView({ el: $("#yt-map-container") });
+      window.mapView = new MapView();
       // show the instructions
       InfoBoxView.Welcome();
     }

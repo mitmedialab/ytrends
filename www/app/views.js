@@ -11,6 +11,9 @@ MapView = Backbone.View.extend({
     minColor: 'rgb(241,233,187)',
     maxColor: 'rgb(207,97,35)',
 
+    el: $("#yt-map-container"),
+    template: _.template($('#yt-map-template').html()),
+
     events: {
         "click    svg": 'handleMapBackgroundClick'
     },
@@ -23,8 +26,7 @@ MapView = Backbone.View.extend({
     render: function(){
         var that = this;
         console.log("rendering MapView");
-        var template = _.template($('#yt-map-template').html(), {});
-        this.$el.html( template );
+        this.$el.html( this.template );
         // Load and render geography
         d3.json("data/world-110m.json", function(error, world) {
             that.initD3();
@@ -99,7 +101,7 @@ MapView = Backbone.View.extend({
             y = d3.event.clientY - $('#yt-map-container').offset().top;
         }
         // show an alert 
-        new AlertView({el: $('#yt-alert'), 
+        new AlertView({ 
             msg: "Sorry, we don't know what people in "+countryName+" watched",
             position: [x, y]
         });
@@ -115,7 +117,7 @@ MapView = Backbone.View.extend({
         if(!this.selected) {
             this.selected = country;
             // show info about country
-            new InfoBoxView({ el: $("#yt-info-box"), country: this.selected});
+            new InfoBoxView({ country: this.selected});
             // update map with related
             //this._showCountryName(country.id);
             this.renderRelated(country);
@@ -125,9 +127,8 @@ MapView = Backbone.View.extend({
             //this._showCountryName(country.id);
             var videos = this.selected.getVideosInCommonWith(country.id);
             new ConnectionInfoView({ 
-                el: $('#yt-connection-info'), 
-                country1: ISO3166.getNameFromId(this.selected.id),
-                country2: ISO3166.getNameFromId(country.id),
+                country1: this.selected,
+                country2: allCountries.get(country.id),
                 percent: this.selected.getPercentInCommonWith(country.id),
                 videoIds: videos
             });
@@ -288,17 +289,19 @@ MapView = Backbone.View.extend({
 });
 
 ConnectionInfoView = Backbone.View.extend({
+    el: $('#yt-connection-info'), 
+    template: _.template($('#yt-connection-info-template').html()),
     initialize: function(){
         this.render();
     },
     render: function(){
         console.log("rendering ConnectionInfoView");
-        var template = _.template($('#yt-connection-info-template').html(), {
-            country1: this.options.country1,
-            country2: this.options.country2,
+        var content = this.template({
+            country1: this.options.country1.get("name"),
+            country2: this.options.country2.get("name"),
             percent: this.options.percent*100
         });
-        this.$el.html( template );
+        this.$el.html( content );
         // and add in the videos
         for(var i=0;i<this.options.videoIds.length;i++){
             $('.yt-video-item-list', this.$el).append( (new VideoItemView({
@@ -313,6 +316,7 @@ ConnectionInfoView = Backbone.View.extend({
 
 VideoItemView = Backbone.View.extend({
     tagName: "li",
+    template: _.template($('#yt-video-item-template').html()),
     events: {
         "click img"   : "showVideo",
     },
@@ -321,14 +325,14 @@ VideoItemView = Backbone.View.extend({
     },
     render: function(){
         console.log("rendering VideoItemView");
-        var template = _.template($('#yt-video-item-template').html(), {
+        var content = this.template({
             videoId: this.options.videoId,
             dayPct: this.options.dayPct
         });
-        this.$el.html( template );
+        this.$el.html( content );
     },
     showVideo: function(evt){
-        new FullVideoView({el: $('#yt-video-modal'), 
+        new FullVideoView({ 
             country1: this.options.country1,
             country2: this.options.country2,
             dayPct: this.options.dayPct,
@@ -337,6 +341,8 @@ VideoItemView = Backbone.View.extend({
 });
 
 FullVideoView = Backbone.View.extend({
+    el: $('#yt-video-modal'),
+    template: _.template($('#yt-full-video-template').html()),
     initialize: function(){
         this.render();
         this.$el.modal();
@@ -345,18 +351,18 @@ FullVideoView = Backbone.View.extend({
         console.log("rendering FullVideoView "+this.options.videoId);
         var t="", s="";
         if(this.options.country2!=null) {
-            t = this.options.country1+" and "+this.options.country2+" both watched this";
+            t = this.options.country1.get("name")+" and "+this.options.country2.get("name")+" both watched this";
             s = "";
         } else {
             t = this.options.country1.get("name")+" watched this";
             s = "This was on the top watched list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
         }
-        var template = _.template($('#yt-full-video-template').html(), {
+        var content = this.template({
             title: t,
             summary: s,
             videoId: this.options.videoId
         });
-        this.$el.html( template );
+        this.$el.html( content );
         this.$el.on('hide.bs.modal',function(){  // make sure video stops playing when modal is closed
             $('div.modal-body').html("");
         });
@@ -365,6 +371,8 @@ FullVideoView = Backbone.View.extend({
 
 var lastAlertTimeout = null;
 AlertView = Backbone.View.extend({
+    el: $('#yt-alert'),
+    template: _.template($('#yt-alert-template').html()),
     initialize: function(){
         this.render();
     },
@@ -373,10 +381,10 @@ AlertView = Backbone.View.extend({
         if(lastAlertTimeout!=null) {
             clearTimeout(lastAlertTimeout);
         }
-        var template = _.template($('#yt-alert-template').html(), {
+        var content = this.template({
             msg: this.options.msg
         });
-        this.$el.html( template )
+        this.$el.html( content )
             .offset({ 
                 top: this.options.position[1] - this.$el.height()/2, 
                 left: this.options.position[0] - this.$el.width()/2
@@ -391,6 +399,8 @@ AlertView = Backbone.View.extend({
 });
 
 InfoBoxView = Backbone.View.extend({
+    el: $("#yt-info-box"), 
+    template: _.template($('#yt-info-box-template').html()),
     initialize: function(){
         this.render();
     },
@@ -410,10 +420,10 @@ InfoBoxView = Backbone.View.extend({
             t = this.options.title;
             c = this.options.content;
         }
-        var template = _.template($('#yt-info-box-template').html(), {
+        var content = this.template({
             title: t, content: c
         });
-        this.$el.html( template );
+        this.$el.html( content );
         if('country' in this.options){
             // and add in the videos
             var videos = this.options.country.get('videos');
@@ -431,7 +441,6 @@ InfoBoxView = Backbone.View.extend({
 });
 InfoBoxView.Welcome = function(){
     new InfoBoxView({ 
-        el: $("#yt-info-box"), 
         title: "Explore the Map",
         content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watched the same videos.  The darker the country, the more they watched the same thing.  Click one of those countries and you can see the actual videos that people watched in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
     });
