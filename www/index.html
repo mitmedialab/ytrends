@@ -101,7 +101,7 @@ $(function(){
     url: "data/weights-mincut.json",
     success: function (collection, response, options) {
       // make the views
-      window.mapView = new MapView({ el: $("#yt-map-container") });
+      window.mapView = new MapView();
       // show the instructions
       InfoBoxView.Welcome();
     }
