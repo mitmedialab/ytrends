@@ -98,7 +98,9 @@ $(function(){
   ISO3166.initialize();
   window.allCountries = new Countries();
   allCountries.fetch({
-    url: "data/weights-mincut.json",
+    //url: "data/weights-count.json",
+    //url: "data/weights-jaccard.json",
+    url: "data/weights-bhattacharyya.json",
     success: function (collection, response, options) {
       // make the views
       window.mapView = new MapView();
