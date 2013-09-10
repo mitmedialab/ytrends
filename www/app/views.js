@@ -412,7 +412,7 @@ InfoBoxView = Backbone.View.extend({
             var countryNames = _.map(this.options.country.getTopFriendCountries(5),function(info){ return info.name; });
             c = "<p>People in "+this.options.country.get("name")+" watched a lot of the same videos as people in:<ul>";
             _.each(this.options.country.getTopFriendCountries(5), function(info){
-                c+= "<li>"+info.name+" <small class='light'>"+Math.round(100*info.percent)+"%</small></li>";
+                c+= "<li>"+info.name+" <!--<small class='light'>"+Math.round(100*info.percent)+"%</small>--></li>";
             });
             c+= "</ul></p>";
             c+= "<p>Here are the top videos watched in "+this.options.country.get("name")+":</p>";
