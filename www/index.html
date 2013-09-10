@@ -31,7 +31,7 @@
   <div id="yt-map-container">
   </div>
 
-  <div id="yt-video-list-container">
+  <div id="yt-connection-info" class="panel panel-default" style="display:none">
   </div>
 
   <div id="yt-info-box" class="panel panel-default" style="display:none">
@@ -44,16 +44,14 @@
 <script type="text/template" id="yt-map-template">
 </script>
 <script type="text/template" id="yt-video-list-template">
-<div class="well">
-  <h3><%=country1%> and <%=country2%> both watch these videos:<h3>
-  <div class="yt-video-item-list row">
-  </div>
-</div>
+  <div class="panel-heading"><h2>... and <%=country2%> watch:<h2></div>
+  <div class="panel-body"><div class="yt-video-item-list row">
+  </div></div>
 </script>
 <script type="text/template" id="yt-video-item-template">
-<div class="col-sm-4 col-md-2">
-  <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
-</div>
+  <div class="col-md-3">
+    <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
+  </div>
 </script>
 <script type="text/template" id="yt-full-video-template">
   <div class="modal-dialog">
@@ -69,12 +67,10 @@
   </div>
 </script>
 <script type="text/template" id="yt-alert-template">
-<%=msg%>
+  <%=msg%>
 </script>
 <script type="text/template" id="yt-info-box-template">
-  <div class="panel-heading">
-    <h2><%=title%></h2>
-  </div>
+  <div class="panel-heading"><h2><%=title%></h2></div>
   <div class="panel-body"><%=content%></div>
 </script>
 
@@ -103,11 +99,9 @@ $(function(){
     success: function (collection, response, options) {
       // make the views
       window.mapView = new MapView({ el: $("#yt-map-container") });
+      // show the instructions
+      InfoBoxView.Welcome();
     }
-  });
-  // show the instructions
-  new InfoBoxView({ el: $("#yt-info-box"), title: "Explore the Map",
-    content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watch the same videos.  The darker the country, the more they watch the same thing.  Click one of those countries and you can see the actual videos that people watch in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
   });
 });
 </script>

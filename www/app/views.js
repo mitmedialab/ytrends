@@ -115,14 +115,18 @@ MapView = Backbone.View.extend({
         // click on first country
         if(!this.selected) {
             this.selected = country;
+            // show info about country
+            new InfoBoxView({ el: $("#yt-info-box"), country: country});
+            // update map with related
+            //this._showCountryName(country.id);
             this.renderRelated(country);
-            this._showCountryName(country.id);
         //clicked on related country
         } else if(country.id !== this.selected.id) {
             this.updateRelated(country);
-            this._showCountryName(country.id);
+            //this._showCountryName(country.id);
             var videos = this.selected.getVideosInCommonWith(country.id);
-            window.videoListView = new VideoListView({ el: $('#yt-video-list-container'), 
+            window.ConnectionInfoView = new ConnectionInfoView({ 
+                el: $('#yt-connection-info'), 
                 country1: ISO3166.getNameFromId(this.selected.id),
                 country2: ISO3166.getNameFromId(country.id),
                 videoIds: videos
@@ -145,7 +149,9 @@ MapView = Backbone.View.extend({
         this.selected = null;
         this.renderAll();
         this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
-        $('#yt-video-list-container').html('');
+        ConnectionInfoView.HideIt();
+        InfoBoxView.Welcome();
+
     },
 
     renderBackground: function (world) {
@@ -281,12 +287,12 @@ MapView = Backbone.View.extend({
     
 });
 
-VideoListView = Backbone.View.extend({
+ConnectionInfoView = Backbone.View.extend({
     initialize: function(){
         this.render();
     },
     render: function(){
-        console.log("rendering VideoListView");
+        console.log("rendering ConnectionInfoView");
         var template = _.template($('#yt-video-list-template').html(), {
             country1: this.options.country1,
             country2: this.options.country2
@@ -300,8 +306,12 @@ VideoListView = Backbone.View.extend({
                 country2: this.options.country2
             })).el );
         }
+        this.$el.fadeIn();
     }
 });
+ConnectionInfoView.HideIt = function(){
+    $('#yt-connection-info').hide();
+};
 
 VideoItemView = Backbone.View.extend({
     events: {
@@ -316,7 +326,6 @@ VideoItemView = Backbone.View.extend({
         this.$el.html( template );
     },
     showVideo: function(evt){
-        console.log(evt.target);
         new FullVideoView({el: $('#yt-video-modal'), 
             country1: this.options.country1,
             country2: this.options.country2,
@@ -337,6 +346,9 @@ FullVideoView = Backbone.View.extend({
             country2: this.options.country2
         });
         this.$el.html( template );
+        this.$el.on('hide.bs.modal',function(){  // make sure video stops playing when modal is closed
+            $('div.modal-body').html("");
+        });
     }
 });
 
@@ -373,10 +385,25 @@ InfoBoxView = Backbone.View.extend({
     },
     render: function(){
         console.log("rendering InfoBoxView");
+        var t = "", c = "";
+        if('country' in this.options){
+            t = this.options.country.get("name")+"...";
+            var countryNames = _.map(this.options.country.getTopFriendCountries(5),function(info){ return info.name; });
+            c = "People in the "+t+" watch a lot the same videos as people in "+_.initial(countryNames).join(", ")+" and "+_.last(countryNames);
+        } else {
+            t = this.options.title;
+            c = this.options.content;
+        }
         var template = _.template($('#yt-info-box-template').html(), {
-            title: this.options.title,
-            content: this.options.content
+            title: t, content: c
         });
         this.$el.html( template ).fadeIn();
     }
 });
+InfoBoxView.Welcome = function(){
+    new InfoBoxView({ 
+        el: $("#yt-info-box"), 
+        title: "Explore the Map",
+        content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watch the same videos.  The darker the country, the more they watch the same thing.  Click one of those countries and you can see the actual videos that people watch in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
+    });
+}
