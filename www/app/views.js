@@ -386,7 +386,7 @@ InfoBoxView = Backbone.View.extend({
         if('country' in this.options){
             t = this.options.country.get("name")+"...";
             var countryNames = _.map(this.options.country.getTopFriendCountries(5),function(info){ return info.name; });
-            c = "People in the "+t+" watch a lot the same videos as people in "+_.initial(countryNames).join(", ")+" and "+_.last(countryNames);
+            c = "People in "+this.options.country.get("name")+" watch a lot of the same videos as people in "+_.initial(countryNames).join(", ")+" and "+_.last(countryNames)+".";
         } else {
             t = this.options.title;
             c = this.options.content;
