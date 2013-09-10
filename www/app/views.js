@@ -127,8 +127,8 @@ MapView = Backbone.View.extend({
             //this._showCountryName(country.id);
             var videos = this.selected.getVideosInCommonWith(country.id);
             new ConnectionInfoView({ 
-                country1: ISO3166.getNameFromId(this.selected.id),
-                country2: ISO3166.getNameFromId(country.id),
+                country1: this.selected,
+                country2: allCountries.get(country.id),
                 percent: this.selected.getPercentInCommonWith(country.id),
                 videoIds: videos
             });
@@ -297,8 +297,8 @@ ConnectionInfoView = Backbone.View.extend({
     render: function(){
         console.log("rendering ConnectionInfoView");
         var content = this.template({
-            country1: this.options.country1,
-            country2: this.options.country2,
+            country1: this.options.country1.get("name"),
+            country2: this.options.country2.get("name"),
             percent: this.options.percent*100
         });
         this.$el.html( content );
@@ -351,7 +351,7 @@ FullVideoView = Backbone.View.extend({
         console.log("rendering FullVideoView "+this.options.videoId);
         var t="", s="";
         if(this.options.country2!=null) {
-            t = this.options.country1+" and "+this.options.country2+" both watched this";
+            t = this.options.country1.get("name")+" and "+this.options.country2.get("name")+" both watched this";
             s = "";
         } else {
             t = this.options.country1.get("name")+" watched this";
