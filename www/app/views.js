@@ -125,7 +125,7 @@ MapView = Backbone.View.extend({
             this.updateRelated(country);
             //this._showCountryName(country.id);
             var videos = this.selected.getVideosInCommonWith(country.id);
-            window.ConnectionInfoView = new ConnectionInfoView({ 
+            new ConnectionInfoView({ 
                 el: $('#yt-connection-info'), 
                 country1: ISO3166.getNameFromId(this.selected.id),
                 country2: ISO3166.getNameFromId(country.id),
@@ -149,7 +149,7 @@ MapView = Backbone.View.extend({
         this.selected = null;
         this.renderAll();
         this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
-        ConnectionInfoView.HideIt();
+        $('#yt-connection-info').fadeOut();
         InfoBoxView.Welcome();
 
     },
@@ -309,9 +309,6 @@ ConnectionInfoView = Backbone.View.extend({
         this.$el.fadeIn();
     }
 });
-ConnectionInfoView.HideIt = function(){
-    $('#yt-connection-info').hide();
-};
 
 VideoItemView = Backbone.View.extend({
     events: {
