@@ -86,17 +86,28 @@ MapView = Backbone.View.extend({
         this.resetSelection();
     },
 
-    handleNoDataCountryClick: function(country){
-        d3.event.stopPropagation();
+    handleInvalidCountryClick: function(country){
         console.log('Clicked ' + country.id + ' (no data)');
         var countryName = ISO3166.getNameFromId(country.id);
+        console.log(d3.event);
+        // support for firefox
+        var x = d3.event.offsetX;
+        if (x == undefined) {
+            x = d3.event.clientX - $('#yt-map-container').offset().left;
+        }
+        var y = d3.event.offsetY;
+        if (y == undefined) {
+            y = d3.event.clientY - $('#yt-map-container').offset().top;
+        }
+        // show an alert 
         new AlertView({el: $('#yt-alert'), 
             msg: "Sorry, we don't know what people in "+countryName+" watch.",
-            position: [d3.event.offsetX, d3.event.offsetY]
+            position: [x, y]
         });
+        d3.event.stopPropagation();
     },
 
-    handleCountryClick: function(country){
+    handleValidCountryClick: function(country){
         d3.event.stopPropagation();
         var countryElem = $('#yt-country'+country.id);
         console.log('Clicked ' + country.id);
@@ -105,9 +116,11 @@ MapView = Backbone.View.extend({
         if(!this.selected) {
             this.selected = country;
             this.renderRelated(country);
+            this._showCountryName(country.id);
         //clicked on related country
         } else if(country.id !== this.selected.id) {
             this.updateRelated(country);
+            this._showCountryName(country.id);
             var videos = this.selected.getVideosInCommonWith(country.id);
             window.videoListView = new VideoListView({ el: $('#yt-video-list-container'), 
                 country1: ISO3166.getNameFromId(this.selected.id),
@@ -119,9 +132,19 @@ MapView = Backbone.View.extend({
         }
     },
     
+    _showCountryName: function(countryId){
+        var label = this.svg.select('#yt-country-name' + countryId)
+                        .attr("opacity",0)
+                        .attr('visibility','visible');
+        var t0 = label.transition().attr('opacity', 1);
+        var t1 = t0.transition().attr('opacity', 0).delay(1000);
+        var t2 = t1.transition().attr('visibility','hiddnen')
+    },
+
     resetSelection: function(){
         this.selected = null;
         this.renderAll();
+        this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
         $('#yt-video-list-container').html('');
     },
 
@@ -131,7 +154,8 @@ MapView = Backbone.View.extend({
         var country = this.svg.select('#yt-background').selectAll(".yt-country").data(countries);
         country.enter().append("path")
             .attr("class", 'yt-country')
-            .on("click", function (d) { return that.handleNoDataCountryClick(d); })
+            .attr("data-id",function(d){ return d.id })
+            .on("click", function (d) { return that.handleInvalidCountryClick(d); })
             .attr("d", this.path);
     },
     
@@ -149,11 +173,28 @@ MapView = Backbone.View.extend({
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
             .attr("d", function (d) { return that.path(that.countryLookup[d.id]); })
-            .on("click", function (d) { return that.handleCountryClick(d); })
+            .on("click", function (d) { return that.handleValidCountryClick(d); })
         g.transition()
             .attr("fill", this.enabledColor)
             .attr("stroke", "rgb(255,255,255)")
             .style("opacity", "1");
+        // Render country names
+        var t = this.svg.select('#yt-data')
+            .selectAll('text')
+            .data(window.allCountries.models, function (d) {return d.id;} );
+        t.enter()
+            .append("text")
+            .attr("class", "yt-country-name")
+            .attr("visibility","hidden")
+            .attr("text-anchor", "middle")
+            .attr("id", function(d,i){ return 'yt-country-name'+d.id})
+            .attr("x",function(d){return that.projection(d.get('centroid'))[0];})
+            .attr("y",function(d){return that.projection(d.get('centroid'))[1];})
+            .text( function(d) {return d.get('name')})
+            .attr("font-family","sans-serif")
+            .attr("font-size", "16px")
+            .attr("font-weight", "bold")
+            .attr("fill","rgb(92,72,58)");
     },
 
     renderRelated: function (country) {
