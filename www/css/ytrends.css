@@ -2,6 +2,7 @@
 
 body {
 	margin-top: 10px;
+	color: rgb(92,72,58);
 }
 
 #yt-map-container{
@@ -46,4 +47,28 @@ body {
 }
 
 .yt-country-name {
+}
+
+h1 {
+	font-family: 'Lobster', cursive;
+	margin-top: 0px;
+	color: rgb(92,72,58);
+}
+
+h2 {
+	font-family: 'Lobster', cursive;
+	margin: 0px;
+	color: rgb(92,72,58);
+}
+
+#yt-content {
+	position: relative;
+}
+
+#yt-info-box {
+	position: absolute;
+	top: 380px;
+	left: 30px;
+	width: 280px;
+	box-shadow: 3px 3px 4px rgba(92,72,58,0.5);
 }

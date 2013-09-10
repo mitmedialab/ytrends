@@ -6,29 +6,9 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
     <link href="css/ytrends.css" rel="stylesheet" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
   </head>
   <body>
-
-<div id="yt-welcome" class="modal fade">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">What We Watch</h4>
-      </div>
-      <div class="modal-body">
-        <p>
-        This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights 
-        other countries where people watch the same videos.  The darker the country, the more they watch 
-        the same thing.  Click one of those countries and you can see the actual videos that people watch in both!
-        </p>
-        <p>
-        Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available
-        on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.
-      </div>
-    </div>
-  </div>
-</div>
 
 <div id="yt-video-modal" class="modal fade">
 </div>
@@ -37,12 +17,28 @@
 </div>
 
 <!-- where the content goes -->
-<div class="container">
+<div id="yt-content" class="container">
+
+  <div class="row">
+    <div class="col-md-8">
+      <h1>What We Watch</h1>
+    </div>
+    <div class="col-md-4">
+      <img src="img/c4cm-badge.gif" alt="MIT Center for Civic Media" class="pull-right"/>
+    </div>
+  </div>
+
   <div id="yt-map-container">
   </div>
+
   <div id="yt-video-list-container">
   </div>
+
+  <div id="yt-info-box" class="panel panel-default" style="display:none">
+  </div>
+
 </div>
+
 
 <!-- templates -->
 <script type="text/template" id="yt-map-template">
@@ -75,6 +71,12 @@
 <script type="text/template" id="yt-alert-template">
 <%=msg%>
 </script>
+<script type="text/template" id="yt-info-box-template">
+  <div class="panel-heading">
+    <h2><%=title%></h2>
+  </div>
+  <div class="panel-body"><%=content%></div>
+</script>
 
 <!-- all the JS includes -->
 <script type="text/Javascript" src="lib/jquery-1.10.2.min.js"></script>
@@ -94,7 +96,7 @@
 
 <script type="text/Javascript">
 $(function(){
-  // load the data
+  // load the map and data
   ISO3166.initialize();
   window.allCountries = new Countries();
   allCountries.fetch({
@@ -104,7 +106,10 @@ $(function(){
       window.mapView = new MapView({ el: $("#yt-map-container") });
     }
   });
-  $('#yt-welcome').modal();
+  // show the instructions
+  new InfoBoxView({ el: $("#yt-info-box"), title: "Explore the Map",
+    content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watch the same videos.  The darker the country, the more they watch the same thing.  Click one of those countries and you can see the actual videos that people watch in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
+  });
 });
 </script>
 

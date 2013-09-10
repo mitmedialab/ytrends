@@ -366,3 +366,17 @@ AlertView = Backbone.View.extend({
         }, 1000);
     }
 });
+
+InfoBoxView = Backbone.View.extend({
+    initialize: function(){
+        this.render();
+    },
+    render: function(){
+        console.log("rendering InfoBoxView");
+        var template = _.template($('#yt-info-box-template').html(), {
+            title: this.options.title,
+            content: this.options.content
+        });
+        this.$el.html( template ).fadeIn();
+    }
+});
