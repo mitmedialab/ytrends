@@ -5,13 +5,16 @@ var Country = Backbone.Model.extend({
         this.set({'alpha3':args['code']});
         this.set({'name':ISO3166.getNameFromId(this.get('id'))});
         this.set({'centroid':Centroid.getCentroidFromAlpha3(args['code'])});
+        this.sortedFriends = null;
     },
     getTopFriendCountries: function(count){
-        // TODO: cache this
-        var sortedFriends = this.get('friends').sort(function(a,b){return b.weight-a.weight});
-        var topFriends = sortedFriends.slice(0,count);
+        if(this.sortedFriends==null){   // lazy cache of sorted friends (most to least)
+            this.sortedFriends = this.get('friends').sort(function(a,b){return b.weight-a.weight});
+        }
+        var topFriends = this.sortedFriends.slice(0,count);
         for(i=0;i<topFriends.length;i++){
             topFriends[i].id = ISO3166.getIdFromAlpha3(topFriends[i].code);
+            topFriends[i].name = ISO3166.getNameFromId(topFriends[i].id);
         }
         return topFriends;
     },
