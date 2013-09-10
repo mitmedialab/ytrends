@@ -323,7 +323,7 @@ VideoItemView = Backbone.View.extend({
         console.log("rendering VideoItemView");
         var template = _.template($('#yt-video-item-template').html(), {
             videoId: this.options.videoId,
-            dayCount: this.options.dayCount
+            dayPct: this.options.dayPct
         });
         this.$el.html( template );
     },
@@ -331,7 +331,7 @@ VideoItemView = Backbone.View.extend({
         new FullVideoView({el: $('#yt-video-modal'), 
             country1: this.options.country1,
             country2: this.options.country2,
-            dayCount: this.options.dayCount,
+            dayPct: this.options.dayPct,
             videoId: $(evt.target).attr('data-video-id')});
     }
 });
@@ -349,7 +349,7 @@ FullVideoView = Backbone.View.extend({
             s = "";
         } else {
             t = this.options.country1.get("name")+" watched this";
-            s = "This was on the top watched list for "+this.options.dayCount+" days.";
+            s = "This was on the top watched list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
         }
         var template = _.template($('#yt-full-video-template').html(), {
             title: t,
@@ -421,7 +421,7 @@ InfoBoxView = Backbone.View.extend({
             for(var i=0;i<Math.min(videos.length,6);i++){
                 $('.yt-video-item-list', this.$el).append( (new VideoItemView({
                     videoId: videos[i][0],
-                    dayCount: videos[i][1],
+                    dayPct: Math.round(100*videos[i][1]/this.options.country.get('days')),
                     country1: this.options.country
                 })).el );
             }

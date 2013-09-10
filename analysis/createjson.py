@@ -12,6 +12,16 @@ engine = sqlalchemy.create_engine("sqlite:///db/development.sqlite3", echo=True)
 Session = sqlalchemy.orm.sessionmaker(bind=engine)
 session = Session()
 
+# Query ranks for all days per country
+country_days = session.query(Rank.loc, sqlalchemy.sql.func.count(sqlalchemy.sql.func.distinct(Rank.date))).\
+    filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+    filter_by(source='view').\
+    group_by(Rank.loc)
+day_count_by_country = {}
+for country_day in country_days:
+    s = country_day[0]
+    day_count_by_country[s] = country_day[1]
+
 # Query ranks for all videos
 ranks = session.query(Rank.video_id, Rank.loc, sqlalchemy.sql.func.count('*').label('entries')).\
     filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
@@ -57,6 +67,7 @@ for src, src_data in results.iteritems():
     if s == 'usa':
         s = "--"
     result = {
+        'days': day_count_by_country[s],
         'code': src,
         'videos': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20],
         'friends': []
