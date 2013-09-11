@@ -6,7 +6,7 @@ class Ytrends::Scraper
   
   def initialize
     @log = Logger.new 'log/scraper.log'
-    @locations = Ytrends::locations
+    @locations = Ytrends::country_locations
     #@db = Ytrends::db
   end
 
