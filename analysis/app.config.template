@@ -1,0 +1,6 @@
+[youtube]
+developer_key: MAGIC_KEY
+client_id: MY_ID
+
+[db]
+path: db/development.sqlite3

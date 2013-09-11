@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130513182933) do
+ActiveRecord::Schema.define(:version => 20130911171029) do
 
   create_table "ranks", :force => true do |t|
     t.string   "source"
@@ -21,6 +21,22 @@ ActiveRecord::Schema.define(:version => 20130513182933) do
     t.date     "date"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+  end
+
+  create_table "videos", :id => false, :force => true do |t|
+    t.string   "id"
+    t.boolean  "viewable"
+    t.string   "title"
+    t.string   "description"
+    t.string   "category"
+    t.string   "tags"
+    t.string   "geo"
+    t.integer  "duration"
+    t.integer  "views"
+    t.decimal  "rating"
+    t.date     "published_date"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
   end
 
 end
