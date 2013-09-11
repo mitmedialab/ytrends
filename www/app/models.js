@@ -43,5 +43,9 @@ var Country = Backbone.Model.extend({
 var Countries = Backbone.Collection.extend({
     model: Country,    
     initialize: function(){
+    },
+    findByAlpha3: function(alpha3){
+        var id = ISO3166.getIdFromAlpha3(alpha3);
+        return this.get(id);
     }
 });
