@@ -9,6 +9,7 @@ import networkx as nx
 import ytrends.locations as locs
 import ytrends.graph as graph
 import stats
+import weights
 
 # Get video stats
 day_count_by_country = stats.get_day_count_by_country()
@@ -33,6 +34,8 @@ for source in count_by_loc.keys():
             t = 'usa'
         if source == target:
             continue
+        # Caclulate percentage
+        percentage = weights.percentage(count_by_loc[source], count_by_loc[target])
         # Calculate intersection and union
         intersection = set(count_by_loc[source].keys()).\
             intersection(set(count_by_loc[target].keys()))
@@ -68,21 +71,14 @@ for source in count_by_loc.keys():
             jaccard[s] = source_res
             
         # Calculate bhattacharyya coefficient
-        normalization = 1 / 10 # 10 videos per day
-        intersection_weights = [
-            (v, math.sqrt(
-                count_by_loc[source][v]/day_count_by_country[source]
-                * count_by_loc[target][v]/day_count_by_country[target])
-            ) for v in intersection
-        ]
-        weight = normalization * sum(w[1] for w in intersection_weights)
-        source_res = bhattacharyya.get(s, {})
+        weight, video_weights = weights.bhattacharyya(count_by_loc[source], count_by_loc[target], day_count_by_country[source], day_count_by_country[target])
         if weight > 0:
+            source_res = bhattacharyya.get(s, {})
             source_res[t] = {
-                'p': float(len(intersection)) / float(len(count_by_loc[source])),
+                'p': percentage,
                 'w': weight,
-                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10],
-                'u': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:10]
+                'v': [w[0] for w in sorted(video_weights, key=lambda x: x[1], reverse=True)][0:10],
+                'u': [w[0] for w in sorted(video_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:10]
             }
             bhattacharyya[s] = source_res
 
