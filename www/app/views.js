@@ -318,7 +318,7 @@ ConnectionInfoView = Backbone.View.extend({
         var content = this.template({
             country1: this.options.country1.get("name"),
             country2: this.options.country2.get("name"),
-            percent: this.options.percent*100
+            percent: Math.round(this.options.percent*100)
         });
         this.$el.html( content );
         // and add in the videos
