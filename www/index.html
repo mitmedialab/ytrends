@@ -88,6 +88,7 @@
 
 <!-- our application code -->
 <script type="text/Javascript" src="lib/country-util.js"></script>
+<script type="text/Javascript" src="app/routes.js"></script>
 <script type="text/Javascript" src="app/models.js"></script>
 <script type="text/Javascript" src="app/views.js"></script>
 
@@ -101,8 +102,11 @@ $(function(){
     //url: "data/weights-jaccard.json",
     url: "data/weights-bhattacharyya.json",
     success: function (collection, response, options) {
+      window.countryRouter = new CountryRouter();
       window.mapView = new MapView();
-      InfoBoxView.Welcome();
+      countryRouter.listenTo(mapView,"render.done",function(){
+        Backbone.history.start();
+      });
     }
   });
 });

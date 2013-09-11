@@ -20,25 +20,34 @@ MapView = Backbone.View.extend({
     
     initialize: function(){
         console.log("Initialized MapView");
+        _.bindAll(this, 
+            'handleMapBackgroundClick',
+            'handleInvalidCountryClick',
+            'handleValidCountryClick',
+            '_finishRender'
+        );
         this.render();
     },
 
     render: function(){
-        var that = this;
-        console.log("rendering MapView");
+        console.log("Rendering MapView:started");
         this.$el.html( this.template );
         // Load and render geography
-        d3.json("data/world-110m.json", function(error, world) {
-            that.initD3();
-            that.createCountryLookup(world);
-            that.renderBackground(world);
-            that.renderAll();
-        });
+        d3.json("data/world-110m.json", this._finishRender);
         d3.select(self.frameElement).style("height", this.height + "px");
     },
     
+    _finishRender:function(error, world){
+        this.initD3();
+        this.createCountryLookup(world);
+        this.renderBackground(world);
+        this.renderAll();
+        console.log("  Rendering MapView:done")
+        this.trigger("render.done");
+    },
+
     initD3: function () {
-        var that = this;
+        console.log("  init D3")
         this.projection = d3.geo.mercator()
             .scale(181)
             .translate([570, 350])
@@ -51,7 +60,8 @@ MapView = Backbone.View.extend({
         this.svg.append('g').attr('id', 'yt-background');
         this.svg.append('g').attr('id', 'yt-data');
         this.svg.append('g').attr('id', 'yt-connections');
-        /*this.svg.append('rect')
+        /*var that = this;
+        this.svg.append('rect')
             .attr('x', 0).attr('y', this.height-50).attr('width', '50').attr('height', '50')
             .attr('fill', this.enabledColor)
             .on('click', function () {
@@ -66,7 +76,7 @@ MapView = Backbone.View.extend({
             });*/
         
         var maxWeight = d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
-        console.log('Global max weight: ' + maxWeight);
+        console.log('  init: lobal max weight: ' + maxWeight);
         this.color = d3.scale.linear()
             .range([this.minColor, this.maxColor])
             .domain([0, maxWeight]);
@@ -85,6 +95,8 @@ MapView = Backbone.View.extend({
     },
 
     handleMapBackgroundClick: function(evt){
+        console.log("Clicked background")
+        window.countryRouter.navigate("");
         this.resetSelection();
     },
 
@@ -109,12 +121,16 @@ MapView = Backbone.View.extend({
     },
 
     handleValidCountryClick: function(country){
-        d3.event.stopPropagation();
-        var countryElem = $('#yt-country'+country.id);
         console.log('Clicked ' + country.id);
+        if(!('cid' in country)){    // gotta turn this into a country model object, since rederRelated uses the video info
+            country = window.allCountries.get(country.id);
+        }
+        if (d3.event) d3.event.stopPropagation();
+        var countryElem = $('#yt-country'+country.id);
 
         // click on first country
         if(!this.selected) {
+            window.countryRouter.navigate(country.get('code'));
             this.selected = country;
             // show info about country
             new InfoBoxView({ country: this.selected});
@@ -123,6 +139,7 @@ MapView = Backbone.View.extend({
             this.renderRelated(country);
         //clicked on related country
         } else if(country.id !== this.selected.id) {
+            window.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
             this.updateRelated(country);
             //this._showCountryName(country.id);
             var videos = this.selected.getVideosInCommonWith(country.id);
@@ -167,6 +184,7 @@ MapView = Backbone.View.extend({
     },
     
     renderAll: function () {
+        console.log("  render All");
         var that = this;
         // Render countries
         var g = this.svg.select('#yt-data')
@@ -427,7 +445,6 @@ InfoBoxView = Backbone.View.extend({
         if('country' in this.options){
             // and add in the videos
             var videos = this.options.country.get('videos');
-            console.log(videos);
             for(var i=0;i<Math.min(videos.length,6);i++){
                 $('.yt-video-item-list', this.$el).append( (new VideoItemView({
                     videoId: videos[i][0],
