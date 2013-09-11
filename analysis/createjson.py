@@ -38,6 +38,11 @@ for rank in ranks:
     videos[rank[0]] = rank[2]
     count_by_loc[rank[1]] = videos
 
+# Calculate inverse document frequency for videos
+videos = set(video_id for by_vid in count_by_loc.values() for video_id in by_vid.keys())
+locs = set(count_by_loc.keys())
+idf = dict((video_id, math.log(len(locs) / sum([1 for l in locs if count_by_loc[l].get(video_id, 0) > 0]))) for video_id in videos)
+
 # Create result dict (for speed)
 jaccard = {}
 bhattacharyya = {}
@@ -66,7 +71,8 @@ for source in count_by_loc.keys():
             source_res[t] = {
                 'p': float(len(intersection)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10]
+                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10],
+                'u': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:10]
             }
             count[s] = source_res
         
@@ -80,7 +86,8 @@ for source in count_by_loc.keys():
             source_res[t] = {
                 'p': float(len(intersection)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10]
+                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10],
+                'u': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:10]
             }
             jaccard[s] = source_res
             
@@ -98,7 +105,8 @@ for source in count_by_loc.keys():
             source_res[t] = {
                 'p': float(len(intersection)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10]
+                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:10],
+                'u': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:10]
             }
             bhattacharyya[s] = source_res
 
@@ -113,6 +121,7 @@ def write_results (results, name):
             'days': day_count_by_country[s],
             'code': src,
             'videos': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20],
+            'unique': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v*idf[k],k), reverse=True)[0:20],
             'friends': []
         }
         for tgt, tgt_data in src_data.iteritems():
@@ -120,7 +129,8 @@ def write_results (results, name):
                 'code': tgt,
                 'percent': str(round( tgt_data['p'], 2)),
                 'weight': tgt_data['w'],
-                'videos': tgt_data['v']
+                'videos': tgt_data['v'],
+                'unique': tgt_data['u'],
             }
             result['friends'].append(friend)
         result_list.append(result)
