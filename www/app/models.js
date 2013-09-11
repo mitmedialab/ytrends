@@ -4,7 +4,7 @@ var Country = Backbone.Model.extend({
         this.set({'id':ISO3166.getIdFromAlpha3(args['code'])});
         this.set({'alpha3':args['code']});
         this.set({'name':ISO3166.getNameFromId(this.get('id'))});
-        this.set({'centroid':Centroid.getCentroidFromAlpha3(args['code'])});
+        this.set({'centroid':Centroid.fromAlpha3(args['code'])});
         this.sortedFriends = null;
     },
     getTopFriendCountries: function(count){

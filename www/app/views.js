@@ -262,7 +262,7 @@ MapView = Backbone.View.extend({
                         data.push({
                             'id': a.id + ':' + b.id,
                             'from': view.projection(a.get('centroid')),
-                            'to': view.projection(Centroid.getCentroidFromAlpha3( ISO3166.getAlpha3FromId(b.id) )),
+                            'to': view.projection(Centroid.fromAlpha3( ISO3166.getAlpha3FromId(b.id) )),
                             'weight': b.weight
                         })
                     }

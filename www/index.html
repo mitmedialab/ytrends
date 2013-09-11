@@ -87,8 +87,7 @@
 <script type="text/Javascript" src="lib/topojson.v1.min.js"></script>
 
 <!-- our application code -->
-<script type="text/Javascript" src="lib/iso3166.js"></script>
-<script type="text/Javascript" src="lib/centroid.js"></script>
+<script type="text/Javascript" src="lib/country-util.js"></script>
 <script type="text/Javascript" src="app/models.js"></script>
 <script type="text/Javascript" src="app/views.js"></script>
 
@@ -102,9 +101,7 @@ $(function(){
     //url: "data/weights-jaccard.json",
     url: "data/weights-bhattacharyya.json",
     success: function (collection, response, options) {
-      // make the views
       window.mapView = new MapView();
-      // show the instructions
       InfoBoxView.Welcome();
     }
   });
