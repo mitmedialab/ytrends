@@ -1,12 +1,9 @@
-from operator import itemgetter
 import dateutil.parser
 import datetime
 import ConfigParser
 import logging
 import sys
-import json
 import sqlalchemy
-import ytrends.locations as locs
 from ytrends.db import *
 import gdata.youtube
 import gdata.youtube.service
@@ -35,7 +32,7 @@ yt_service.developer_key = config.get('youtube','developer_key')
 yt_service.client_id = config.get('youtube','client_id')
 log.info("Connected to youtube")
 
-# find all videos that don't have metadata
+# find videos that don't have metadata
 new_videos = session.query(Rank.video_id).\
     filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
     filter_by(source='view').\
@@ -55,9 +52,8 @@ for video in new_videos:
         viewable = True
     except gdata.service.RequestError:
         viewable = False
-    # save metadata
+    # save metadata to db
     now = datetime.datetime.now()
-    print now
     v = Video(id=video_id)
     v.viewable = viewable
     v.created_at = now
@@ -78,30 +74,6 @@ for video in new_videos:
         v.published_date = dateutil.parser.parse(entry.published.text)
     session.add(v)
     session.commit()
-
-def PrintEntryDetails(entry):
-  print 'Video title: %s' % entry.media.title.text
-  print 'Video published on: %s ' % entry.published.text
-  print 'Video description: %s' % entry.media.description.text
-  print 'Video category: %s' % entry.media.category[0].text
-  print 'Video tags: %s' % entry.media.keywords.text
-  print 'Video watch page: %s' % entry.media.player.url
-  print 'Video flash player URL: %s' % entry.GetSwfUrl()
-  print 'Video duration: %s' % entry.media.duration.seconds
-
-  # non entry.media attributes
-  print 'Video geo location: %s' % entry.geo
-  print 'Video view count: %s' % entry.statistics.view_count
-  print 'Video rating: %s' % entry.rating.average
-
-  # show alternate formats
-  for alternate_format in entry.media.content:
-    if 'isDefault' not in alternate_format.extension_attributes:
-      print 'Alternate format: %s | url: %s ' % (alternate_format.type,
-                                                 alternate_format.url)
-
-  # show thumbnails
-  for thumbnail in entry.media.thumbnail:
-    print 'Thumbnail url: %s' % thumbnail.url
+    log.info("  saved"+video_id)
 
 log.info("Done!")
