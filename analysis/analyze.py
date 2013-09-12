@@ -38,7 +38,7 @@ for source in count_by_loc.keys():
 			continue
 		weight, video_weights = weights.bhattacharyya(count_by_loc[source], count_by_loc[target], day_count_by_country[source], day_count_by_country[target])
 		if weight > 0:
-			C.add_edge(s, t, weight=weight)
+			C.add_edge(s, t, weight=1.0/weight)
 		
 # Find Centrality		
 print("Calculating betweenness centrality for country graph")
