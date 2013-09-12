@@ -8,10 +8,10 @@ import networkx as nx
 
 import ytrends.locations as locs
 import ytrends.graph as graph
-import stats
-import weights
+import ytrends.stats as stats
+import ytrends.weights as weights
 
-VIDEO_COUNT = 20       # will output this many of the top N videos for everything
+VIDEO_COUNT = 10       # will output this many of the top N videos for everything
 
 # Get video stats
 day_count_by_country = stats.get_day_count_by_country()
