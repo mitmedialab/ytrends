@@ -62,16 +62,20 @@ for video in new_videos:
         v.title =  unicode(entry.media.title.text, "utf-8")
         if entry.media.description.text is not None:
             v.description = unicode(entry.media.description.text, "utf-8")
-        v.category = unicode(entry.media.category[0].text, "utf-8")
+        if entry.media.category is not None:
+            v.category = unicode(entry.media.category[0].text, "utf-8")
         if entry.media.keywords.text is not None:
             v.tags = unicode(entry.media.keywords.text, "utf-8")
         if entry.geo is not None:
             v.geo = unicode(' '.join(str(s) for s in entry.geo.location()), "utf-8")
-        v.duration = entry.media.duration.seconds
-        v.views = entry.statistics.view_count
+        if entry.media.duration is not None:
+            v.duration = entry.media.duration.seconds
+        if entry.statistics is not None:
+            v.views = entry.statistics.view_count
         if entry.rating is not None:
             v.rating = entry.rating.average
-        v.published_date = dateutil.parser.parse(entry.published.text)
+        if entry.published is not None:
+            v.published_date = dateutil.parser.parse(entry.published.text)
     session.add(v)
     session.commit()
     log.info("  saved"+video_id)
