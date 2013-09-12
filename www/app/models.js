@@ -37,6 +37,16 @@ var Country = Backbone.Model.extend({
             }
         }
         return [];  // nothing in common
+    },
+    getIdfVideosInCommonWith: function(countryId){
+        var friendCountryAlpha3 = ISO3166.getAlpha3FromId(countryId);
+        var friends = this.get('friends');
+        for(i=0;i<friends.length;i++){
+            if(friends[i].code==friendCountryAlpha3){
+                return friends[i].unique;
+            }
+        }
+        return [];  // nothing in common
     }
 });
 

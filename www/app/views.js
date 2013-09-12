@@ -142,7 +142,8 @@ MapView = Backbone.View.extend({
             window.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
             this.updateRelated(country);
             //this._showCountryName(country.id);
-            var videos = this.selected.getVideosInCommonWith(country.id);
+            //var videos = this.selected.getVideosInCommonWith(country.id);
+            var videos = this.selected.getIdfVideosInCommonWith(country.id);
             new ConnectionInfoView({ 
                 country1: this.selected,
                 country2: allCountries.get(country.id),
@@ -317,7 +318,7 @@ ConnectionInfoView = Backbone.View.extend({
         var content = this.template({
             country1: this.options.country1.get("name"),
             country2: this.options.country2.get("name"),
-            percent: this.options.percent*100
+            percent: Math.round(this.options.percent*100)
         });
         this.$el.html( content );
         // and add in the videos
@@ -443,8 +444,10 @@ InfoBoxView = Backbone.View.extend({
         });
         this.$el.html( content );
         if('country' in this.options){
-            // and add in the videos
-            var videos = this.options.country.get('videos');
+            // Add in popular videos
+            //var videos = this.options.country.get('videos');
+            // Add in popular videos weighted by idf
+            var videos = this.options.country.get('unique');
             for(var i=0;i<Math.min(videos.length,6);i++){
                 $('.yt-video-item-list', this.$el).append( (new VideoItemView({
                     videoId: videos[i][0],
