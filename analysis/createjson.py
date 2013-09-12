@@ -16,6 +16,7 @@ VIDEO_COUNT = 10       # will output this many of the top N videos for everythin
 # Get video stats
 day_count_by_country = stats.get_day_count_by_country()
 count_by_loc = stats.get_count_by_loc()
+viewable = stats.get_viewable()
 
 # Calculate inverse document frequency for videos
 videos = set(video_id for by_vid in count_by_loc.values() for video_id in by_vid.keys())
@@ -52,8 +53,8 @@ for source in count_by_loc.keys():
             source_res[t] = {
                 'p': float(len(intersection)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:VIDEO_COUNT],
-                'u': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:VIDEO_COUNT]
+                'v': [w[0] for w in sorted([w for w in intersection_weights if viewable.get(w[0], False)], key=lambda x: x[1], reverse=True)][0:VIDEO_COUNT],
+                'u': [w[0] for w in sorted([w for w in intersection_weights if viewable.get(w[0], False)], key=lambda x: x[1]*idf[x[0]], reverse=True)][0:VIDEO_COUNT]
             }
             count[s] = source_res
         
@@ -67,8 +68,8 @@ for source in count_by_loc.keys():
             source_res[t] = {
                 'p': float(len(intersection)) / float(len(count_by_loc[source])),
                 'w': weight,
-                'v': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1], reverse=True)][0:VIDEO_COUNT],
-                'u': [w[0] for w in sorted(intersection_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:VIDEO_COUNT]
+                'v': [w[0] for w in sorted([w for w in intersection_weights if viewable.get(w[0], False)], key=lambda x: x[1], reverse=True)][0:VIDEO_COUNT],
+                'u': [w[0] for w in sorted([w for w in intersection_weights if viewable.get(w[0], False)], key=lambda x: x[1]*idf[x[0]], reverse=True)][0:VIDEO_COUNT]
             }
             jaccard[s] = source_res
             
@@ -79,8 +80,8 @@ for source in count_by_loc.keys():
             source_res[t] = {
                 'p': percentage,
                 'w': weight,
-                'v': [w[0] for w in sorted(video_weights, key=lambda x: x[1], reverse=True)][0:VIDEO_COUNT],
-                'u': [w[0] for w in sorted(video_weights, key=lambda x: x[1]*idf[x[0]], reverse=True)][0:VIDEO_COUNT]
+                'v': [w[0] for w in sorted([w for w in video_weights if viewable.get(w[0], False)], key=lambda x: x[1], reverse=True)][0:VIDEO_COUNT],
+                'u': [w[0] for w in sorted([w for w in video_weights if viewable.get(w[0], False)], key=lambda x: x[1]*idf[x[0]], reverse=True)][0:VIDEO_COUNT]
             }
             bhattacharyya[s] = source_res
 
@@ -94,8 +95,8 @@ def write_results (results, name):
         result = {
             'days': day_count_by_country[s],
             'code': src,
-            'videos': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:VIDEO_COUNT],
-            'unique': sorted(count_by_loc[s].iteritems(), key=lambda (k,v): (v*idf[k],k), reverse=True)[0:VIDEO_COUNT],
+            'videos': sorted([v for v in count_by_loc[s].iteritems() if viewable.get(v[0], False)], key=lambda (k,v): (v,k), reverse=True)[0:VIDEO_COUNT],
+            'unique': sorted([v for v in count_by_loc[s].iteritems() if viewable.get(v[0], False)], key=lambda (k,v): (v*idf[k],k), reverse=True)[0:VIDEO_COUNT],
             'friends': []
         }
         for tgt, tgt_data in src_data.iteritems():

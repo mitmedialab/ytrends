@@ -7,6 +7,17 @@ engine = sqlalchemy.create_engine("sqlite:///db/development.sqlite3", echo=True)
 Session = sqlalchemy.orm.sessionmaker(bind=engine)
 session = Session()
 
+def get_viewable():
+    # Query ranks for all videos
+    rows = session.query(Rank.video_id, Video.viewable).\
+        filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+        filter_by(source='view').\
+        outerjoin(Video)
+    viewable = {}
+    for row in rows:
+        viewable[row[0]] = row[1]
+    return viewable
+
 def get_day_count_by_country():
     # Query ranks for all days per country
     country_days = session.query(Rank.loc, sqlalchemy.sql.func.count(sqlalchemy.sql.func.distinct(Rank.date))).\
