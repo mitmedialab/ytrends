@@ -70,7 +70,19 @@
   <div class="panel-heading"><h2><%=title%></h2></div>
   <div class="panel-body">
     <div class="row"><div class="col-md-12"><%=content%></div></div>
-    <div class="row"><div class="col-md-12"><ul class="yt-video-item-list"></ul></div></div>
+  </div>
+</script>
+<script type="text/template" id="yt-country-details-template">
+  <p>People in <%=countryName%> watched a lot of the same videos as people in:
+    <ul id="yt-related-list"></ul>
+  </p>
+  <ul class="nav nav-tabs" id="country-video-list-nav">
+    <li class="active"><a href="#yt-country-top">Top Videos</a></li>
+    <li><a href="#yt-country-unique">Unique Videos</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane active" id="yt-country-top"><ul class="yt-video-item-list"></ul></div>
+    <div class="tab-pane" id="yt-country-unique"><ul class="yt-video-item-list"></ul></div>
   </div>
 </script>
 <script type="text/template" id="yt-video-item-template">

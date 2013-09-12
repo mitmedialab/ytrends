@@ -428,13 +428,7 @@ InfoBoxView = Backbone.View.extend({
         var t = "", c = "";
         if('country' in this.options){
             t = this.options.country.get("name")+"...";
-            var countryNames = _.map(this.options.country.getTopFriendCountries(5),function(info){ return info.name; });
-            c = "<p>People in "+this.options.country.get("name")+" watched a lot of the same videos as people in:<ul>";
-            _.each(this.options.country.getTopFriendCountries(5), function(info){
-                c+= "<li>"+info.name+" <!--<small class='light'>"+Math.round(100*info.percent)+"%</small>--></li>";
-            });
-            c+= "</ul></p>";
-            c+= "<p>Here are the top videos watched in "+this.options.country.get("name")+":</p>";
+            c = _.template($('#yt-country-details-template').html(),{countryName: this.options.country.get("name")});
         } else {
             t = this.options.title;
             c = this.options.content;
@@ -444,17 +438,34 @@ InfoBoxView = Backbone.View.extend({
         });
         this.$el.html( content );
         if('country' in this.options){
+            // add in related countries
+            var relatedCountryListHtml = "";
+            _.each(this.options.country.getTopFriendCountries(5), function(info){
+                relatedCountryListHtml+= "<li>"+info.name+" <!--<small class='light'>"+Math.round(100*info.percent)+"%</small>--></li>";
+            });
+            $('#yt-related-list',this.$el).html(relatedCountryListHtml);
             // Add in popular videos
-            //var videos = this.options.country.get('videos');
-            // Add in popular videos weighted by idf
-            var videos = this.options.country.get('unique');
-            for(var i=0;i<Math.min(videos.length,6);i++){
-                $('.yt-video-item-list', this.$el).append( (new VideoItemView({
+            var videos = this.options.country.get('videos');
+            for(var i=0;i<Math.min(videos.length,10);i++){
+                $('#yt-country-top ul.yt-video-item-list', this.$el).append( (new VideoItemView({
                     videoId: videos[i][0],
                     dayPct: Math.round(100*videos[i][1]/this.options.country.get('days')),
                     country1: this.options.country
                 })).el );
             }
+            // Add in popular videos weighted by idf
+            var videos = this.options.country.get('unique');
+            for(var i=0;i<Math.min(videos.length,10);i++){
+                $('#yt-country-unique ul.yt-video-item-list', this.$el).append( (new VideoItemView({
+                    videoId: videos[i][0],
+                    dayPct: Math.round(100*videos[i][1]/this.options.country.get('days')),
+                    country1: this.options.country
+                })).el );
+            }
+            $('#country-video-list-nav a').click(function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
         }
         this.$el.fadeIn();  // do a fade here so it matches the countries fade in
     }
