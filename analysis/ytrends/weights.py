@@ -1,3 +1,4 @@
+from __future__ import division
 import math
 
 def percentage (source_counts, target_counts):
