@@ -75,14 +75,14 @@ MapView = Backbone.View.extend({
                 }
             });*/
         
-        var maxWeight = d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
-        console.log('  init: lobal max weight: ' + maxWeight);
+        this.maxWeight = d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
+        console.log('  init: global max weight: ' + this.maxWeight);
         this.color = d3.scale.linear()
             .range([this.minColor, this.maxColor])
-            .domain([0, maxWeight]);
+            .domain([0, this.maxWeight]);
         this.opacity = d3.scale.linear()
             .range([0, .5])
-            .domain([0, maxWeight]);
+            .domain([0, this.maxWeight]);
     },
     
     createCountryLookup: function (world) {
@@ -235,9 +235,15 @@ MapView = Backbone.View.extend({
         var friends = country.getTopFriendCountries();
         // Create color array to use as d3 data
         // This lets us add the selected country as a special case
-        var countryMax = d3.max(friends, function (d) { return d.weight; });
-        console.log('Normalizing to range (0, ' + countryMax + ')');
-        this.color.domain([0, countryMax]);
+        if (typeof(normalizeToGlobal) !== 'undefined' && normalizeToGlobal) {
+            var countryMax = d3.max(friends, function (d) { return d.weight; });
+            console.log('Normalizing to range (0, ' + this.maxWeight + ')');
+            this.color.domain([0, this.maxWeight]);
+        } else {
+            var countryMax = d3.max(friends, function (d) { return d.weight; });
+            console.log('Normalizing to range (0, ' + countryMax + ')');
+            this.color.domain([0, countryMax]);
+        }
         colors = [{id:country.id, color:this.selectedColor}];
         $.each(friends, function (i, d) {
             colors.push({id:d.id, color:that.color(d.weight)});
