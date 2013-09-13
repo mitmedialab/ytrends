@@ -81,9 +81,10 @@ MapView = Backbone.View.extend({
         this.color = d3.scale.linear()
             .range([this.minColor, this.maxColor])
             .domain([0, this.maxWeight]);
-        this.opacity = d3.scale.linear()
-            .range([0, .5])
+        this.opacity = d3.scale.pow().exponent(2)
+            .range([0, 1])
             .domain([0, this.maxWeight]);
+        //this.renderConnections();
     },
     
     createCountryLookup: function (world) {
@@ -287,8 +288,8 @@ MapView = Backbone.View.extend({
                     if (a.id < b.id) {
                         data.push({
                             'id': a.id + ':' + b.id,
-                            'from': view.projection(a.get('centroid')),
-                            'to': view.projection(Centroid.fromAlpha3( ISO3166.getAlpha3FromId(b.id) )),
+                            'from': a.get('centroid'),
+                            'to': Centroid.fromAlpha3( ISO3166.getAlpha3FromId(b.id) ),
                             'weight': b.weight
                         })
                     }
@@ -298,15 +299,13 @@ MapView = Backbone.View.extend({
         // Render connections
         var g = this.svg.select('#yt-connections');
         group = g.selectAll('.connection').data(data, function (d) { return d.id; });
-        group.enter().append('line')
+        group.enter().append('path')
             .attr('class', 'connection')
-            .attr('x1', function (d) { return d.from[0]; })
-            .attr('x2', function (d) { return d.to[0]; })
-            .attr('y1', function (d) { return d.from[1]; })
-            .attr('y2', function (d) { return d.to[1]; })
+            .attr('d', function (d) { return view.path({"type":"LineString", "coordinates":[d.from, d.to]}); })
             .attr('stroke', this.connectionColor)
             .attr('stroke-width', '2')
-            .attr('stroke-opacity', '0');
+            .attr('stroke-opacity', '0')
+            .attr('fill', 'none');
         group.exit().remove();
         group.transition()
             .attr('stroke-opacity', function (d) { return view.opacity(d.weight); } )
