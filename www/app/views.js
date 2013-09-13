@@ -1,3 +1,4 @@
+var normalizeToGlobal = true;
 MapView = Backbone.View.extend({
 
     // Configuration
