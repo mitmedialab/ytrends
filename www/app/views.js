@@ -3,7 +3,7 @@ MapView = Backbone.View.extend({
 
     // Configuration
     width: 1170,
-    height: 565,
+    height: 520,
     // see http://www.colourlovers.com/palette/125988/Artificial_Growth
     disabledColor: 'rgb(240, 240, 240)',
     enabledColor: 'rgb(243,195,99)',
@@ -49,9 +49,9 @@ MapView = Backbone.View.extend({
 
     initD3: function () {
         console.log("  init D3")
-        this.projection = d3.geo.mercator()
-            .scale(181)
-            .translate([570, 350])
+        this.projection = d3.geo.kavrayskiy7()
+            .scale(220)
+            .translate([580, 300])
             .precision(.1);
         this.path = d3.geo.path()
             .projection(this.projection);
@@ -433,7 +433,7 @@ InfoBoxView = Backbone.View.extend({
         console.log("rendering InfoBoxView");
         var t = "", c = "";
         if('country' in this.options){
-            t = this.options.country.get("name")+"...";
+            t = this.options.country.get("name");
             c = _.template($('#yt-country-details-template').html(),{countryName: this.options.country.get("name")});
         } else {
             t = this.options.title;

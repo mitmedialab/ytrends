@@ -43,9 +43,9 @@
 <script type="text/template" id="yt-map-template">
 </script>
 <script type="text/template" id="yt-connection-info-template">
-  <div class="panel-heading"><h2>... and <%=country2%></h2></div>
+  <div class="panel-heading"><h2>Watched in <%=country1%> and <%=country2%></h2></div>
   <div class="panel-body">
-    <div class="row"><div class="col-md-12"><p><b><%=percent%>%</b> of the top videos watched in <%=country1%> are also watched in <%=country2%>.</p></div></div>
+    <div class="row"><div class="col-md-12"><p><b><%=percent%>%</b> of the top videos watched in <%=country1%> are also watched in <%=country2%>. Here are the top videos that are watched in <b>both</b> places.</p></div></div>
     <div class="row"><div class="col-md-12"><ul class="yt-video-item-list"></ul></div></div>
   </div>
 </script>
@@ -73,7 +73,7 @@
   </div>
 </script>
 <script type="text/template" id="yt-country-details-template">
-  <p>Based on what they're watching, <%=countryName%> has the strongest connections with:
+  <p>Based on what they are watching, <%=countryName%> has the strongest connections with:
     <ul id="yt-related-list"></ul>
   </p>
   <ul class="nav nav-tabs" id="country-video-list-nav">
@@ -90,19 +90,19 @@
 </script>
 
 <!-- all the JS includes -->
-<script type="text/Javascript" src="lib/jquery-1.10.2.min.js"></script>
-<script type="text/Javascript" src="lib/underscore-min.js"></script>
-<script type="text/Javascript" src="lib/backbone-min.js"></script>
-<script type="text/Javascript" src="lib/bootstrap.min.js"></script>
-<script type="text/Javascript" src="lib/d3.v3.min.js"></script>
-<script type="text/Javascript" src="lib/d3.geo.projection.v0.min.js"></script>
-<script type="text/Javascript" src="lib/topojson.v1.min.js"></script>
+<script type="text/Javascript" src="lib/jquery-1.10.2.min.js" charset="utf-8"></script>
+<script type="text/Javascript" src="lib/underscore-min.js" charset="utf-8"></script>
+<script type="text/Javascript" src="lib/backbone-min.js" charset="utf-8"></script>
+<script type="text/Javascript" src="lib/bootstrap.min.js" charset="utf-8"></script>
+<script type="text/Javascript" src="lib/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/Javascript" src="lib/d3.geo.projection.v0.min.js" charset="utf-8"></script>
+<script type="text/Javascript" src="lib/topojson.v1.min.js" charset="utf-8"></script>
 
 <!-- our application code -->
-<script type="text/Javascript" src="lib/country-util.js"></script>
-<script type="text/Javascript" src="app/routes.js"></script>
-<script type="text/Javascript" src="app/models.js"></script>
-<script type="text/Javascript" src="app/views.js"></script>
+<script type="text/Javascript" src="lib/country-util.js" charset="utf-8"></script>
+<script type="text/Javascript" src="app/routes.js" charset="utf-8"></script>
+<script type="text/Javascript" src="app/models.js" charset="utf-8"></script>
+<script type="text/Javascript" src="app/views.js" charset="utf-8"></script>
 
 <script type="text/Javascript">
 $(function(){
