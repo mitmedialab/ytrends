@@ -99,7 +99,6 @@ MapView = Backbone.View.extend({
 
     handleMapBackgroundClick: function(evt){
         console.log("Clicked background")
-        window.countryRouter.navigate("");
         this.resetSelection();
     },
 
@@ -177,7 +176,7 @@ MapView = Backbone.View.extend({
         this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
         $('#yt-connection-info').hide();
         InfoBoxView.Welcome();
-
+        window.countryRouter.navigate("");
     },
 
     renderBackground: function (world) {
@@ -328,7 +327,7 @@ ConnectionInfoView = Backbone.View.extend({
     el: $('#yt-connection-info'), 
     template: _.template($('#yt-connection-info-template').html()),
     events: {
-        "click      .close":    "handleClose"
+        "click       .close-btn":    "handleClose"
     },
     initialize: function(){
         this.render();
@@ -446,7 +445,7 @@ InfoBoxView = Backbone.View.extend({
     el: $("#yt-info-box"), 
     template: _.template($('#yt-info-box-template').html()),
     events: {
-        "click      .close":    "handleClose"
+        "click      .close-btn":    "handleClose"
     },
     initialize: function(){
         this.render();
@@ -494,9 +493,9 @@ InfoBoxView = Backbone.View.extend({
                 e.preventDefault();
                 $(this).tab('show');
             });
-            $('.close', this.$el).show();
+            $('.close-btn', this.$el).show();
         } else {
-            $('.close', this.$el).hide();
+            $('.close-btn', this.$el).hide();
         }
         this.$el.fadeIn();  // do a fade here so it matches the countries fade in
     },
@@ -507,6 +506,6 @@ InfoBoxView = Backbone.View.extend({
 InfoBoxView.Welcome = function(){
     new InfoBoxView({ 
         title: "Explore the Map",
-        content: '<p>This is a visual exploration of the most popular videos on YouTube.  Clicking a country highlights other countries where people watched the same videos.  The darker the country, the more they watched the same thing.  Click one of those countries and you can see the actual videos that people watched in both!</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
+        content: '<p>Click on a country to see which other countries watched similar videos.  The darker the country, the more they have in common.  Click a second country to see what videos are popular in both places.</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
     });
 };
