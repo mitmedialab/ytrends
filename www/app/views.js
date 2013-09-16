@@ -25,7 +25,8 @@ MapView = Backbone.View.extend({
             'handleMapBackgroundClick',
             'handleInvalidCountryClick',
             'handleValidCountryClick',
-            '_finishRender'
+            '_finishRender',
+            'unhighlightCountry'
         );
         this.render();
     },
@@ -132,15 +133,17 @@ MapView = Backbone.View.extend({
 
         // click on first country
         if(!this.selected) {
+            console.log("  first country click");
             window.countryRouter.navigate(country.get('code'));
             this.selected = country;
             // show info about country
             new InfoBoxView({ country: this.selected});
             // update map with related
             //this._showCountryName(country.id);
-            this.renderRelated(country);
+            this.renderRelated(country);        
         //clicked on related country
         } else if(country.id !== this.selected.id) {
+            console.log("  second country click");
             window.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
             this.updateRelated(country);
             //this._showCountryName(country.id);
@@ -153,6 +156,7 @@ MapView = Backbone.View.extend({
                 videoIds: videos
             });
         } else {
+            console.log("  other click");
             this.resetSelection();
         }
     },
@@ -167,6 +171,7 @@ MapView = Backbone.View.extend({
     },
 
     resetSelection: function(){
+        console.log("  reset selection");
         this.selected = null;
         this.renderAll();
         this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
@@ -278,6 +283,13 @@ MapView = Backbone.View.extend({
             .attr('stroke-width', '2');
     },
     
+    unhighlightCountry: function(country){
+        this.svg.select('#yt-country' + country.id)
+            .transition()
+            .attr('stroke', '#fff')
+            .attr('stroke-width', '1');
+    },
+
     renderConnections: function (country) {
         var view = this;
         // Create data set of country pairs
@@ -310,12 +322,14 @@ MapView = Backbone.View.extend({
         group.transition()
             .attr('stroke-opacity', function (d) { return view.opacity(d.weight); } )
     }
-    
 });
 
 ConnectionInfoView = Backbone.View.extend({
     el: $('#yt-connection-info'), 
     template: _.template($('#yt-connection-info-template').html()),
+    events: {
+        "click      .close":    "handleClose"
+    },
     initialize: function(){
         this.render();
     },
@@ -336,6 +350,11 @@ ConnectionInfoView = Backbone.View.extend({
             })).el );
         }
         this.$el.show();
+    },
+    handleClose: function(){
+        window.mapView.unhighlightCountry(this.options.country2);
+        this.$el.hide();
+        window.countryRouter.navigate(this.options.country1.get('code'));
     }
 });
 
@@ -426,6 +445,9 @@ AlertView = Backbone.View.extend({
 InfoBoxView = Backbone.View.extend({
     el: $("#yt-info-box"), 
     template: _.template($('#yt-info-box-template').html()),
+    events: {
+        "click      .close":    "handleClose"
+    },
     initialize: function(){
         this.render();
     },
@@ -472,8 +494,14 @@ InfoBoxView = Backbone.View.extend({
                 e.preventDefault();
                 $(this).tab('show');
             });
+            $('.close', this.$el).show();
+        } else {
+            $('.close', this.$el).hide();
         }
         this.$el.fadeIn();  // do a fade here so it matches the countries fade in
+    },
+    handleClose: function(){
+        window.mapView.handleMapBackgroundClick();
     }
 });
 InfoBoxView.Welcome = function(){
