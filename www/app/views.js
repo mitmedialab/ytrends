@@ -1,9 +1,6 @@
 var normalizeToGlobal = true;
 MapView = Backbone.View.extend({
 
-    // Configuration
-    width: 1170,
-    height: 520,
     // see http://www.colourlovers.com/palette/125988/Artificial_Growth
     disabledColor: 'rgb(240, 240, 240)',
     enabledColor: 'rgb(243,195,99)',
@@ -36,7 +33,7 @@ MapView = Backbone.View.extend({
         this.$el.html( this.template );
         // Load and render geography
         d3.json("data/world-110m.json", this._finishRender);
-        d3.select(self.frameElement).style("height", this.height + "px");
+        console.log(this._getMapHeight());
     },
     
     _finishRender:function(error, world){
@@ -48,17 +45,29 @@ MapView = Backbone.View.extend({
         this.trigger("render.done");
     },
 
+    _getMapHeight: function(){
+        return this._getMapWidth() / 2.19 // 520 @ 1140
+    },
+
+    _getMapWidth: function(){
+        return parseInt(d3.select(this.el).style('width'));
+    },
+
     initD3: function () {
         console.log("  init D3")
+        var mapWidth = this._getMapWidth();
+        var mapHeight = this._getMapHeight();
+        var mapScale = mapWidth / 5.18; // 220 @ 1140
+        var mapOffset = [mapWidth/1.96, mapHeight / 1.73]; // 580, 300 @ 1140
         this.projection = d3.geo.kavrayskiy7()
-            .scale(220)
-            .translate([580, 300])
+            .scale(mapScale)
+            .translate([mapOffset[0], mapOffset[1]])
             .precision(.1);
         this.path = d3.geo.path()
             .projection(this.projection);
         this.svg = d3.select(this.el).append("svg")
-            .attr("width", this.width)
-            .attr("height", this.height);
+            .attr("width", mapWidth)
+            .attr("height", mapHeight);
         this.svg.append('g').attr('id', 'yt-background');
         this.svg.append('g').attr('id', 'yt-data');
         this.svg.append('g').attr('id', 'yt-connections');
