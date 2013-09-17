@@ -18,7 +18,7 @@ window.App = {
     // load the map and data, start the app
     initialize: function(){
         ISO3166.initialize();
-        App.allCountries = new Countries();
+        App.allCountries = new App.CountriesCollection();
         App.allCountries.fetch({
 
             //url: "data/weights-count.json",

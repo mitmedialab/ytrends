@@ -1,5 +1,5 @@
 
-var Country = Backbone.Model.extend({
+App.Country = Backbone.Model.extend({
     initialize: function(args){
         this.set({'id':ISO3166.getIdFromAlpha3(args['code'])});
         this.set({'alpha3':args['code']});
@@ -50,8 +50,8 @@ var Country = Backbone.Model.extend({
     }
 });
 
-var Countries = Backbone.Collection.extend({
-    model: Country,    
+App.CountriesCollection = Backbone.Collection.extend({
+    model: App.Country,    
     initialize: function(){
     },
     findByAlpha3: function(alpha3){
