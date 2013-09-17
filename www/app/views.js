@@ -326,7 +326,7 @@ App.ConnectionInfoView = Backbone.View.extend({
     el: $('#yt-connection-info'), 
     template: _.template($('#yt-connection-info-template').html()),
     events: {
-        "click       .close-btn":    "handleClose"
+        "click       .yt-close-btn":    "handleClose"
     },
     initialize: function(){
         this.render();
@@ -378,7 +378,8 @@ App.VideoItemView = Backbone.View.extend({
             country1: this.options.country1,
             country2: this.options.country2,
             dayPct: this.options.dayPct,
-            videoId: $(evt.target).attr('data-video-id')});
+            videoId: $(evt.target).attr('data-video-id')
+        });
     }
 });
 
@@ -443,10 +444,21 @@ App.InfoBoxView = Backbone.View.extend({
     el: $("#yt-info-box"), 
     template: _.template($('#yt-info-box-template').html()),
     events: {
-        "click      .close-btn":    "handleClose"
+        "click   .yt-close-btn":              "handleClose",
+        "click   .yt-related-country":        "handleRelatedCountry",
+        "click   #country-video-list-nav a":  "handleTabs"
     },
     initialize: function(){
         this.render();
+    },
+    handleTabs: function(evt){
+        $(evt.target).tab('show');
+        e.preventDefault();
+    },
+    handleRelatedCountry: function(evt){
+        var countryId = $(evt.target).attr('data-country-id');
+        App.mapView.handleValidCountryClick( App.allCountries.get(countryId) );
+        evt.preventDefault();
     },
     render: function(){
         App.debug("rendering InfoBoxView");
@@ -466,7 +478,7 @@ App.InfoBoxView = Backbone.View.extend({
             // add in related countries
             var relatedCountryListHtml = "";
             _.each(this.options.country.getTopFriendCountries(5), function(info){
-                relatedCountryListHtml+= "<li>"+info.name+" <!--<small class='light'>"+Math.round(100*info.percent)+"%</small>--></li>";
+                relatedCountryListHtml+= '<li><a href="#" class="yt-related-country" data-country-id="'+info.id+'">'+info.name+'</a></li>';
             });
             $('#yt-related-list',this.$el).html(relatedCountryListHtml);
             // Add in popular videos
@@ -487,13 +499,9 @@ App.InfoBoxView = Backbone.View.extend({
                     country1: this.options.country
                 })).el );
             }
-            $('#country-video-list-nav a').click(function (e) {
-                e.preventDefault();
-                $(this).tab('show');
-            });
-            $('.close-btn', this.$el).show();
+            $('.yt-close-btn', this.$el).show();
         } else {
-            $('.close-btn', this.$el).hide();
+            $('.yt-close-btn', this.$el).hide();
         }
         this.$el.fadeIn();  // do a fade here so it matches the countries fade in
     },
