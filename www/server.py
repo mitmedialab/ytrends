@@ -31,13 +31,14 @@ def index():
 @app.route("/video/<video_id>/popularity.json")
 def video_popularity(video_id):
     popularity = stats.get_video_popularity(video_id)
+    if '--' in popularity.keys():
+        popularity['usa'] = popularity['--']
+        del popularity['--']
     max_country = sorted(popularity, key=popularity.get, reverse=True)[0]
     max_days = max(popularity.values())
     log.info(popularity)
     data = []
     for country_code,day_count in popularity.iteritems():
-        if(country_code=='--'):
-            country_code='usa'
         data.append( {'code': country_code, 'score': float(day_count)/float(max_days)} )
     return jsonify(
         videoId=video_id,

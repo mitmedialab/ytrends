@@ -21,7 +21,6 @@ App.MapView = Backbone.View.extend({
             'handleMapBackgroundClick',
             'handleInvalidCountryClick',
             'handleValidCountryClick',
-            '_finishRender',
             'unhighlightCountry'
         );
         this.render();
@@ -30,19 +29,14 @@ App.MapView = Backbone.View.extend({
     render: function(){
         App.debug("Rendering MapView:started");
         this.$el.html( this.template );
-        // Load and render geography
-        d3.json("static/data/world-110m.json", this._finishRender);
-    },
-    
-    _finishRender:function(error, world){
         this.initD3();
-        this.createCountryLookup(world);
-        this.renderBackground(world);
+        this.createCountryLookup(App.globals.worldMap);
+        this.renderBackground(App.globals.worldMap);
         this.renderAll();
         App.debug("  Rendering MapView:done")
         this.trigger("render.done");
     },
-
+    
     initD3: function () {
         App.debug("  init D3")
         var mapWidth = parseInt(d3.select(this.el).style('width'));
@@ -405,7 +399,7 @@ App.debug(data);
             s = "";
         } else {
             t = this.options.country1.get("name")+" watched this";
-            s = "This was on the top watched list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
+            s = "This was on the top trending list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
         }
         var content = this.template({
             title: t,
