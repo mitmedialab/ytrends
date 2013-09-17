@@ -1,12 +1,8 @@
 App.MapView = Backbone.View.extend({
 
     // see http://www.colourlovers.com/palette/125988/Artificial_Growth
-    disabledColor: 'rgb(240, 240, 240)',
-    enabledColor: 'rgb(243,195,99)',
     selectedColor: 'rgb(170,217,241)',
     connectionColor: 'rgb(170,217,241)',
-    minColor: 'rgb(241,233,187)',
-    maxColor: 'rgb(207,97,35)',
 
     el: $("#yt-map-container"),
     template: _.template($('#yt-map-template').html()),
@@ -29,16 +25,14 @@ App.MapView = Backbone.View.extend({
     render: function(){
         App.debug("Rendering MapView:started");
         this.$el.html( this.template );
-        this.initD3();
-        this.createCountryLookup(App.globals.worldMap);
+        this.initMap();
         this.renderBackground(App.globals.worldMap);
         this.renderAll();
         App.debug("  Rendering MapView:done")
-        this.trigger("render.done");
     },
     
-    initD3: function () {
-        App.debug("  init D3")
+    initMap: function () {
+        App.debug("  init map")
         var mapWidth = parseInt(d3.select(this.el).style('width'));
         var mapHeight = mapWidth / 2.19 // 520 @ 1140
         var mapScale = mapWidth / 5.18; // 220 @ 1140
@@ -58,7 +52,7 @@ App.MapView = Backbone.View.extend({
         /*var that = this;
         this.svg.append('rect')
             .attr('x', 0).attr('y', this.height-50).attr('width', '50').attr('height', '50')
-            .attr('fill', this.enabledColor)
+            .attr('fill', App.glocal.colors.enabledColor)
             .on('click', function () {
                 that.showConnections = !that.showConnections;
                 if (that.showConnections) {
@@ -73,7 +67,7 @@ App.MapView = Backbone.View.extend({
         this.maxWeight = d3.max(App.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
         App.debug('  init: global max weight: ' + this.maxWeight);
         this.color = d3.scale.linear()
-            .range([this.minColor, this.maxColor])
+            .range([App.globals.colors.minColor, App.globals.colors.maxColor])
             .domain([0, this.maxWeight]);
         this.opacity = d3.scale.pow().exponent(2)
             .range([0, 1])
@@ -81,15 +75,6 @@ App.MapView = Backbone.View.extend({
         //this.renderConnections();
     },
     
-    createCountryLookup: function (world) {
-        var that = this;
-        this.countryLookup = {};
-        var countries = topojson.feature(world, world.objects.countries).features;
-        $.each(countries, function (i, d) {
-            that.countryLookup[d.id] = d;
-        });
-    },
-
     handleMapBackgroundClick: function(evt){
         App.debug("Clicked background")
         this.resetSelection();
@@ -193,14 +178,14 @@ App.MapView = Backbone.View.extend({
         g.enter()
             .append("path")
             .attr("class", "yt-country")
-            .attr("fill", this.disabledColor)
+            .attr("fill", App.globals.colors.disabledColor)
             .attr("stroke", "rgb(255,255,255)")
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
-            .attr("d", function (d) { return that.path(that.countryLookup[d.id]); })
+            .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
             .on("click", function (d) { return that.handleValidCountryClick(d); });
         g.transition()
-            .attr("fill", this.enabledColor)
+            .attr("fill", App.globals.colors.enabledColor)
             .attr("stroke", "rgb(255,255,255)")
             .style("opacity", "1");
         // Render country names
@@ -243,7 +228,7 @@ App.MapView = Backbone.View.extend({
             App.debug('Normalizing to range (0, ' + countryMax + ')');
             this.color.domain([0, countryMax]);
         }
-        colors = [{id:country.id, color:this.selectedColor}];
+        var colors = [{id:country.id, color:this.selectedColor}];
         $.each(friends, function (i, d) {
             colors.push({id:d.id, color:that.color(d.weight)});
         });
@@ -254,7 +239,7 @@ App.MapView = Backbone.View.extend({
             .attr("class", "yt-country")
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
-            .attr("d", function (d) { return that.path(that.countryLookup[d.id]); })
+            .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
         countries.exit()
             .remove();
         countries
@@ -386,7 +371,6 @@ App.FullVideoView = Backbone.View.extend({
         $.getJSON('/video/'+this.options.videoId+'/popularity.json',this.onResultsReturned);
     },
     onResultsReturned: function(data){
-App.debug(data);
         this.options.popularity = data;
         this.render();
         this.$el.modal();
@@ -409,7 +393,50 @@ App.debug(data);
             videoId: this.options.videoId
         });
         this.$el.html( content );
-        this.$el.on('hide.bs.modal',function(){  // make sure video stops playing when modal is closed
+        // render the map of global popularity
+        this.projection = d3.geo.kavrayskiy7()
+            .scale(125)
+            .translate([270,170])
+            .precision(.1);
+        this.path = d3.geo.path()
+            .projection(this.projection);
+        this.svg = d3.select(this.el).select('.modal-body').append("svg")
+            .attr("width", 560)
+            .attr("height", 300);
+        this.svg.append('g').attr('id', 'yt-background');
+        this.svg.append('g').attr('id', 'yt-data');
+        this.color = d3.scale.linear()
+            .range([App.globals.colors.minColor, App.globals.colors.maxColor])
+            .domain([0, 1]);
+        this.opacity = d3.scale.pow().exponent(2)
+            .range([0, 1])
+            .domain([0, 1]);
+        var that = this;
+        var countries = topojson.feature(App.globals.worldMap, App.globals.worldMap.objects.countries).features;
+        var country = this.svg.select('#yt-background').selectAll(".yt-country").data(countries);
+        country.enter().append("path")
+            .attr("class", 'yt-country')
+            .attr("data-id",function(d){ return d.id })
+            .attr("d", this.path);
+        var colors = [];
+        $.each(this.options.popularity.data, function (i, d) {
+            colors.push({id:ISO3166.getIdFromAlpha3(d.code), color:that.color(d.score)});
+        });
+        var countries = this.svg.select('#yt-data').selectAll('.yt-country')
+            .data(colors, function (d) { return d.id; });
+        countries.enter()
+            .append("path")
+            .attr("class", "yt-country")
+            .attr("id", function(d,i) {return "yt-country"+d.id})
+            .attr("data-id", function(d,i) {return d.id})
+            .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
+        countries.exit()
+            .remove();
+        countries
+            .transition()
+            .attr("fill", function (d) { return d.color; });
+        // make sure video stops playing when modal is closed
+        this.$el.on('hide.bs.modal',function(){
             $('div.modal-body').html("");
         });
     }

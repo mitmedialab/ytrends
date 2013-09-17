@@ -5,8 +5,15 @@ window.App = {
     globals: {
         lastAlertTimeout: null,
         normalizeToGlobal: true,
-        writeLog: true,
-        worldMap: null
+        writeLog: false,
+        worldMap: null,
+        countryIdToPath: {},
+        colors: {
+            minColor: 'rgb(241,233,187)',
+            maxColor: 'rgb(207,97,35)',
+            disabledColor: 'rgb(240, 240, 240)',
+            enabledColor: 'rgb(243,195,99)'
+        }
     },
 
     // wrapper so we can turn off logging in one place
@@ -29,9 +36,14 @@ window.App = {
             url: "static/data/weights-bhattacharyya.json",
             success: runApp
         });
-        d3.json('static/data/world-50m.json', function(data){
+        d3.json('static/data/world-110m.json', function(data){
             App.debug("  got map data")
             App.globals.worldMap = data;
+            App.globals.countryIdToPath = {};
+            var countries = topojson.feature(App.globals.worldMap, App.globals.worldMap.objects.countries).features;
+            $.each(countries, function (i, d) {
+                App.globals.countryIdToPath[d.id] = d;
+            });
             runApp();
         });
     },
@@ -42,10 +54,8 @@ window.App = {
         $('#yt-progress-bar').hide();
         App.countryRouter = new App.CountryRouter();
         App.mapView = new App.MapView();
-        App.countryRouter.listenTo(App.mapView,"render.done",function(){
-            Backbone.history.start();
-        });
         App.InfoBoxView.Welcome();
+        Backbone.history.start();
     }
 
 };

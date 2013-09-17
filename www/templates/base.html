@@ -3,10 +3,12 @@
   <head>
     <title>What We Watch</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="static/css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
-    <link href="static/css/whatwewatch.css" rel="stylesheet" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+      <!--<link href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">-->
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+      <!--<link href="static/css/bootstrap-theme.min.css" rel="stylesheet" media="screen">-->
+    <link rel="stylesheet" href="static/css/whatwewatch.css" media="screen">
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Lobster' type='text/css'>
   </head>
   <body>
 
@@ -16,7 +18,6 @@
 <div id="yt-alert" class="alert alert-warning" style="display:none;">
 </div>
 
-<!-- where the content goes -->
 <div id="yt-content" class="container">
 
   <div class="row">
@@ -105,26 +106,26 @@
 </script>
 
 <!-- all the JS includes -->
-<script type="text/Javascript" src="static/lib/jquery-1.10.2.min.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/lib/underscore-min.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/lib/backbone-min.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/lib/bootstrap.min.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/lib/d3.v3.min.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/lib/d3.geo.projection.v0.min.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/lib/topojson.v1.min.js" charset="utf-8"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" charset="utf-8"></script>
+  <!--<script src="static/lib/jquery-1.10.2.min.js" charset="utf-8"></script>-->
+<script src="static/lib/underscore-min.js" charset="utf-8"></script>
+<script src="static/lib/backbone-min.js" charset="utf-8"></script>
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <!--<script src="static/lib/bootstrap.min.js" charset="utf-8"></script>-->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <!--<script src="static/lib/d3.v3.min.js" charset="utf-8"></script>-->
+<script src="http://d3js.org/d3.geo.projection.v0.min.js" charset="utf-8"></script>
+  <!--<script src="static/lib/d3.geo.projection.v0.min.js" charset="utf-8"></script>-->
+<script src="static/lib/topojson.v1.min.js" charset="utf-8"></script>
 
 <!-- our application code -->
-<script type="text/Javascript" src="static/lib/country-util.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/app/app.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/app/routes.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/app/models.js" charset="utf-8"></script>
-<script type="text/Javascript" src="static/app/views.js" charset="utf-8"></script>
+<script src="static/lib/country-util.js" charset="utf-8"></script>
+<script src="static/app/app.js" charset="utf-8"></script>
+<script src="static/app/routes.js" charset="utf-8"></script>
+<script src="static/app/models.js" charset="utf-8"></script>
+<script src="static/app/views.js" charset="utf-8"></script>
 
-<script type="text/Javascript">
-$(function(){
-  App.initialize();
-});
-</script>
+<script>$(function(){ App.initialize(); });</script>
 
   </body>
 </html>
