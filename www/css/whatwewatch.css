@@ -83,26 +83,6 @@ h4 {
 	box-shadow: 3px 3px 4px rgba(92,72,58,0.5);	
 }
 
-/* iPads (landscape) ----------- */
-@media only screen 
-and (min-device-width : 768px) 
-and (max-device-width : 1024px) 
-and (orientation : landscape) {
-	
-	#yt-connection-info {
-		top: 460px;
-		left: 390px;
-		width: 515px;
-	}
-
-	#yt-info-box {
-		left: -10px;
-		top: 360px;
-		width:280px;
-	}
-
-}
-
 small.light {
 	color: #bbb;
 }
@@ -125,4 +105,24 @@ ul.yt-video-item-list li {
 #yt-progress-bar h2 {
 	text-align: center;
 	margin-bottom: 15px;
+}
+
+/* iPads (landscape) ----------- */
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) 
+and (orientation : landscape) {
+	
+	#yt-connection-info {
+		top: 460px;
+		left: 390px;
+		width: 515px;
+	}
+
+	#yt-info-box {
+		left: -10px;
+		top: 360px;
+		width:280px;
+	}
+
 }
