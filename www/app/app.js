@@ -26,11 +26,12 @@ window.App = {
             url: "data/weights-bhattacharyya.json",
 
             success: function (collection, response, options) {
-              App.countryRouter = new App.CountryRouter();
-              App.mapView = new App.MapView();
-              App.countryRouter.listenTo(App.mapView,"render.done",function(){
-                Backbone.history.start();
-              });
+                App.countryRouter = new App.CountryRouter();
+                App.mapView = new App.MapView();
+                App.countryRouter.listenTo(App.mapView,"render.done",function(){
+                    Backbone.history.start();
+                });
+                $('#yt-progress-bar').hide();
             }
 
         });
