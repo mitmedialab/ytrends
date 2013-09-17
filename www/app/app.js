@@ -4,12 +4,15 @@ window.App = {
 
     globals: {
         lastAlertTimeout: null,
-        normalizeToGlobal: true
+        normalizeToGlobal: true,
+        writeLog: false
     },
 
     // wrapper so we can turn off logging in one place
     debug: function(str){
-        console.log(str);
+        if(App.globals.writeLog){
+            console.log(str);
+        }
     },
 
     // load the map and data, start the app
