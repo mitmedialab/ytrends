@@ -8,6 +8,7 @@ import ytrends.stats
 
 # constants
 CONFIG_FILENAME = 'app.config'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # setup logging
 logging.basicConfig(filename='server.log',level=logging.DEBUG)
@@ -16,7 +17,7 @@ log.info("----------------------------------------------------------------------
 
 # read in app config
 config = ConfigParser.ConfigParser()
-config.read(CONFIG_FILENAME)
+config.read(os.path.join(BASE_DIR,CONFIG_FILENAME))
 
 # init the connection to the database
 stats = ytrends.stats.Stats("sqlite:///"+config.get('db','path'), False)
