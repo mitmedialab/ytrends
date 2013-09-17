@@ -204,7 +204,7 @@ App.MapView = Backbone.View.extend({
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
             .attr("d", function (d) { return that.path(that.countryLookup[d.id]); })
-            .on("click", function (d) { return that.handleValidCountryClick(d); })
+            .on("click", function (d) { return that.handleValidCountryClick(d); });
         g.transition()
             .attr("fill", this.enabledColor)
             .attr("stroke", "rgb(255,255,255)")
