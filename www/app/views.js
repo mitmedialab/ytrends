@@ -1,5 +1,4 @@
-var normalizeToGlobal = true;
-MapView = Backbone.View.extend({
+App.MapView = Backbone.View.extend({
 
     // see http://www.colourlovers.com/palette/125988/Artificial_Growth
     disabledColor: 'rgb(240, 240, 240)',
@@ -17,7 +16,7 @@ MapView = Backbone.View.extend({
     },
     
     initialize: function(){
-        console.log("Initialized MapView");
+        App.debug("Initialized MapView");
         _.bindAll(this, 
             'handleMapBackgroundClick',
             'handleInvalidCountryClick',
@@ -29,11 +28,10 @@ MapView = Backbone.View.extend({
     },
 
     render: function(){
-        console.log("Rendering MapView:started");
+        App.debug("Rendering MapView:started");
         this.$el.html( this.template );
         // Load and render geography
         d3.json("data/world-110m.json", this._finishRender);
-        console.log(this._getMapHeight());
     },
     
     _finishRender:function(error, world){
@@ -41,22 +39,14 @@ MapView = Backbone.View.extend({
         this.createCountryLookup(world);
         this.renderBackground(world);
         this.renderAll();
-        console.log("  Rendering MapView:done")
+        App.debug("  Rendering MapView:done")
         this.trigger("render.done");
     },
 
-    _getMapHeight: function(){
-        return this._getMapWidth() / 2.19 // 520 @ 1140
-    },
-
-    _getMapWidth: function(){
-        return parseInt(d3.select(this.el).style('width'));
-    },
-
     initD3: function () {
-        console.log("  init D3")
-        var mapWidth = this._getMapWidth();
-        var mapHeight = this._getMapHeight();
+        App.debug("  init D3")
+        var mapWidth = parseInt(d3.select(this.el).style('width'));
+        var mapHeight = mapWidth / 2.19 // 520 @ 1140
         var mapScale = mapWidth / 5.18; // 220 @ 1140
         var mapOffset = [mapWidth/1.96, mapHeight / 1.73]; // 580, 300 @ 1140
         this.projection = d3.geo.kavrayskiy7()
@@ -86,8 +76,8 @@ MapView = Backbone.View.extend({
                 }
             });*/
         
-        this.maxWeight = d3.max(window.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
-        console.log('  init: global max weight: ' + this.maxWeight);
+        this.maxWeight = d3.max(App.allCountries.models, function (d) { return d3.max(d.attributes.friends, function (d) { return d.weight; }); });
+        App.debug('  init: global max weight: ' + this.maxWeight);
         this.color = d3.scale.linear()
             .range([this.minColor, this.maxColor])
             .domain([0, this.maxWeight]);
@@ -107,12 +97,12 @@ MapView = Backbone.View.extend({
     },
 
     handleMapBackgroundClick: function(evt){
-        console.log("Clicked background")
+        App.debug("Clicked background")
         this.resetSelection();
     },
 
     handleInvalidCountryClick: function(country){
-        console.log('Clicked ' + country.id + ' (no data)');
+        App.debug('Clicked ' + country.id + ' (no data)');
         var countryName = ISO3166.getNameFromId(country.id);
         // support for firefox
         var x = d3.event.offsetX;
@@ -124,7 +114,7 @@ MapView = Backbone.View.extend({
             y = d3.event.clientY - $('#yt-map-container').offset().top;
         }
         // show an alert 
-        new AlertView({ 
+        new App.AlertView({ 
             msg: "Sorry, we don't know what people in "+countryName+" watched",
             position: [x, y]
         });
@@ -132,39 +122,39 @@ MapView = Backbone.View.extend({
     },
 
     handleValidCountryClick: function(country){
-        console.log('Clicked ' + country.id);
+        App.debug('Clicked ' + country.id);
         if(!('cid' in country)){    // gotta turn this into a country model object, since rederRelated uses the video info
-            country = window.allCountries.get(country.id);
+            country = App.allCountries.get(country.id);
         }
         if (d3.event) d3.event.stopPropagation();
         var countryElem = $('#yt-country'+country.id);
 
         // click on first country
         if(!this.selected) {
-            console.log("  first country click");
-            window.countryRouter.navigate(country.get('code'));
+            App.debug("  first country click");
+            App.countryRouter.navigate(country.get('code'));
             this.selected = country;
             // show info about country
-            new InfoBoxView({ country: this.selected});
+            new App.InfoBoxView({ country: this.selected});
             // update map with related
             //this._showCountryName(country.id);
             this.renderRelated(country);        
         //clicked on related country
         } else if(country.id !== this.selected.id) {
-            console.log("  second country click");
-            window.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
+            App.debug("  second country click");
+            App.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
             this.updateRelated(country);
             //this._showCountryName(country.id);
             //var videos = this.selected.getVideosInCommonWith(country.id);
             var videos = this.selected.getIdfVideosInCommonWith(country.id);
-            new ConnectionInfoView({ 
+            new App.ConnectionInfoView({ 
                 country1: this.selected,
-                country2: allCountries.get(country.id),
+                country2: App.allCountries.get(country.id),
                 percent: this.selected.getPercentInCommonWith(country.id),
                 videoIds: videos
             });
         } else {
-            console.log("  other click");
+            App.debug("  other click");
             this.resetSelection();
         }
     },
@@ -179,13 +169,13 @@ MapView = Backbone.View.extend({
     },
 
     resetSelection: function(){
-        console.log("  reset selection");
+        App.debug("  reset selection");
         this.selected = null;
         this.renderAll();
         this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
         $('#yt-connection-info').hide();
-        InfoBoxView.Welcome();
-        window.countryRouter.navigate("");
+        App.InfoBoxView.Welcome();
+        App.countryRouter.navigate("");
     },
 
     renderBackground: function (world) {
@@ -200,12 +190,12 @@ MapView = Backbone.View.extend({
     },
     
     renderAll: function () {
-        console.log("  render All");
+        App.debug("  render All");
         var that = this;
         // Render countries
         var g = this.svg.select('#yt-data')
             .selectAll('.yt-country')
-            .data(window.allCountries.models, function (d) { return d.id; });
+            .data(App.allCountries.models, function (d) { return d.id; });
         g.enter()
             .append("path")
             .attr("class", "yt-country")
@@ -222,7 +212,7 @@ MapView = Backbone.View.extend({
         // Render country names
         var t = this.svg.select('#yt-data')
             .selectAll('text')
-            .data(window.allCountries.models, function (d) {return d.id;} );
+            .data(App.allCountries.models, function (d) {return d.id;} );
         t.enter()
             .append("text")
             .attr("class", "yt-country-name")
@@ -243,20 +233,20 @@ MapView = Backbone.View.extend({
         // handle the case where we have data for the country
         var countryElem = $('#yt-country'+country.id);
         if(country==null){
-            console.log("No info about "+country.id);
+            App.debug("No info about "+country.id);
             return;
         }
         $('.yt-country').attr("class","yt-country");
         var friends = country.getTopFriendCountries();
         // Create color array to use as d3 data
         // This lets us add the selected country as a special case
-        if (typeof(normalizeToGlobal) !== 'undefined' && normalizeToGlobal) {
+        if (App.globals.normalizeToGlobal) {
             var countryMax = d3.max(friends, function (d) { return d.weight; });
-            console.log('Normalizing to range (0, ' + this.maxWeight + ')');
+            App.debug('Normalizing to range (0, ' + this.maxWeight + ')');
             this.color.domain([0, this.maxWeight]);
         } else {
             var countryMax = d3.max(friends, function (d) { return d.weight; });
-            console.log('Normalizing to range (0, ' + countryMax + ')');
+            App.debug('Normalizing to range (0, ' + countryMax + ')');
             this.color.domain([0, countryMax]);
         }
         colors = [{id:country.id, color:this.selectedColor}];
@@ -303,7 +293,7 @@ MapView = Backbone.View.extend({
         // Create data set of country pairs
         var data = [];
         if (typeof(country) == 'undefined') {
-            $.each(window.allCountries.models, function (i, a) {
+            $.each(App.allCountries.models, function (i, a) {
                 $.each(a.getTopFriendCountries(), function (i, b) {
                     if (a.id < b.id) {
                         data.push({
@@ -332,7 +322,7 @@ MapView = Backbone.View.extend({
     }
 });
 
-ConnectionInfoView = Backbone.View.extend({
+App.ConnectionInfoView = Backbone.View.extend({
     el: $('#yt-connection-info'), 
     template: _.template($('#yt-connection-info-template').html()),
     events: {
@@ -342,7 +332,7 @@ ConnectionInfoView = Backbone.View.extend({
         this.render();
     },
     render: function(){
-        console.log("rendering ConnectionInfoView");
+        App.debug("rendering ConnectionInfoView");
         var content = this.template({
             country1: this.options.country1.get("name"),
             country2: this.options.country2.get("name"),
@@ -351,7 +341,7 @@ ConnectionInfoView = Backbone.View.extend({
         this.$el.html( content );
         // and add in the videos
         for(var i=0;i<this.options.videoIds.length;i++){
-            $('.yt-video-item-list', this.$el).append( (new VideoItemView({
+            $('.yt-video-item-list', this.$el).append( (new App.VideoItemView({
                 videoId:this.options.videoIds[i],
                 country1: this.options.country1,
                 country2: this.options.country2
@@ -360,13 +350,13 @@ ConnectionInfoView = Backbone.View.extend({
         this.$el.show();
     },
     handleClose: function(){
-        window.mapView.unhighlightCountry(this.options.country2);
+        App.mapView.unhighlightCountry(this.options.country2);
         this.$el.hide();
-        window.countryRouter.navigate(this.options.country1.get('code'));
+        App.countryRouter.navigate(this.options.country1.get('code'));
     }
 });
 
-VideoItemView = Backbone.View.extend({
+App.VideoItemView = Backbone.View.extend({
     tagName: "li",
     template: _.template($('#yt-video-item-template').html()),
     events: {
@@ -376,7 +366,7 @@ VideoItemView = Backbone.View.extend({
         this.render();
     },
     render: function(){
-        console.log("rendering VideoItemView");
+        App.debug("rendering VideoItemView");
         var content = this.template({
             videoId: this.options.videoId,
             dayPct: this.options.dayPct
@@ -384,7 +374,7 @@ VideoItemView = Backbone.View.extend({
         this.$el.html( content );
     },
     showVideo: function(evt){
-        new FullVideoView({ 
+        new App.FullVideoView({ 
             country1: this.options.country1,
             country2: this.options.country2,
             dayPct: this.options.dayPct,
@@ -392,7 +382,7 @@ VideoItemView = Backbone.View.extend({
     }
 });
 
-FullVideoView = Backbone.View.extend({
+App.FullVideoView = Backbone.View.extend({
     el: $('#yt-video-modal'),
     template: _.template($('#yt-full-video-template').html()),
     initialize: function(){
@@ -400,7 +390,7 @@ FullVideoView = Backbone.View.extend({
         this.$el.modal();
     },
     render: function(){
-        console.log("rendering FullVideoView "+this.options.videoId);
+        App.debug("rendering FullVideoView "+this.options.videoId);
         var t="", s="";
         if(this.options.country2!=null) {
             t = this.options.country1.get("name")+" and "+this.options.country2.get("name")+" both watched this";
@@ -421,17 +411,16 @@ FullVideoView = Backbone.View.extend({
     }
 });
 
-var lastAlertTimeout = null;
-AlertView = Backbone.View.extend({
+App.AlertView = Backbone.View.extend({
     el: $('#yt-alert'),
     template: _.template($('#yt-alert-template').html()),
     initialize: function(){
         this.render();
     },
     render: function(){
-        console.log("rendering AlertView ");
-        if(lastAlertTimeout!=null) {
-            clearTimeout(lastAlertTimeout);
+        App.debug("rendering AlertView ");
+        if(App.globals.lastAlertTimeout!=null) {
+            clearTimeout(App.globals.lastAlertTimeout);
         }
         var content = this.template({
             msg: this.options.msg
@@ -444,13 +433,13 @@ AlertView = Backbone.View.extend({
             .css('opacity',1)
             .show();
         var that = this;
-        lastAlertTimeout = window.setTimeout(function() {
+        App.globals.lastAlertTimeout = window.setTimeout(function() {
             that.$el.fadeTo(200, 0);
         }, 1000);
     }
 });
 
-InfoBoxView = Backbone.View.extend({
+App.InfoBoxView = Backbone.View.extend({
     el: $("#yt-info-box"), 
     template: _.template($('#yt-info-box-template').html()),
     events: {
@@ -460,7 +449,7 @@ InfoBoxView = Backbone.View.extend({
         this.render();
     },
     render: function(){
-        console.log("rendering InfoBoxView");
+        App.debug("rendering InfoBoxView");
         var t = "", c = "";
         if('country' in this.options){
             t = this.options.country.get("name");
@@ -483,7 +472,7 @@ InfoBoxView = Backbone.View.extend({
             // Add in popular videos
             var videos = this.options.country.get('videos');
             for(var i=0;i<Math.min(videos.length,10);i++){
-                $('#yt-country-top ul.yt-video-item-list', this.$el).append( (new VideoItemView({
+                $('#yt-country-top ul.yt-video-item-list', this.$el).append( (new App.VideoItemView({
                     videoId: videos[i][0],
                     dayPct: Math.round(100*videos[i][1]/this.options.country.get('days')),
                     country1: this.options.country
@@ -492,7 +481,7 @@ InfoBoxView = Backbone.View.extend({
             // Add in popular videos weighted by idf
             var videos = this.options.country.get('unique');
             for(var i=0;i<Math.min(videos.length,10);i++){
-                $('#yt-country-unique ul.yt-video-item-list', this.$el).append( (new VideoItemView({
+                $('#yt-country-unique ul.yt-video-item-list', this.$el).append( (new App.VideoItemView({
                     videoId: videos[i][0],
                     dayPct: Math.round(100*videos[i][1]/this.options.country.get('days')),
                     country1: this.options.country
@@ -509,12 +498,12 @@ InfoBoxView = Backbone.View.extend({
         this.$el.fadeIn();  // do a fade here so it matches the countries fade in
     },
     handleClose: function(){
-        window.mapView.handleMapBackgroundClick();
+        App.mapView.handleMapBackgroundClick();
     }
 });
-InfoBoxView.Welcome = function(){
-    new InfoBoxView({ 
+App.InfoBoxView.Welcome = function(){
+    new App.InfoBoxView({ 
         title: "Explore the Map",
-        content: '<p>Click on a country to see which other countries watched similar videos.  The darker the country, the more they have in common.  Click a second country to see what videos are popular in both places.</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p>'
+        content: '<p>Click on a country to see which other countries watched similar videos.  The darker the country, the more they have in common.  Click a second country to see what videos are popular in both places.</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p><p><small>Curious? Email whatwewatch&#64;media.mit.edu</small></p>'
     });
 };

@@ -1,4 +1,4 @@
-var CountryRouter = Backbone.Router.extend({
+App.CountryRouter = Backbone.Router.extend({
 
   routes: {
     "":                    "home",
@@ -7,27 +7,27 @@ var CountryRouter = Backbone.Router.extend({
   },
 
   home: function(){
-    console.log("Routed to root");
-    window.mapView.handleMapBackgroundClick();
+    App.debug("Routed to root");
+    App.mapView.handleMapBackgroundClick();
   },
 
   exploreCountry: function(country1Alpha3) {
-    console.log("Routed to "+country1Alpha3);
-    var country1 = window.allCountries.findByAlpha3(country1Alpha3);
+    App.debug("Routed to "+country1Alpha3);
+    var country1 = App.allCountries.findByAlpha3(country1Alpha3);
     if(country1){
-      window.mapView.handleValidCountryClick(country1);
+      App.mapView.handleValidCountryClick(country1);
     } else {
       //TODO
     }
   },
 
   exploreRelated: function(country1Alpha3, country2Alpha3) {
-    console.log("Routed to "+country1Alpha3+"/"+country2Alpha3);
-    var country1 = window.allCountries.findByAlpha3(country1Alpha3);
-    var country2 = window.allCountries.findByAlpha3(country2Alpha3);
+    App.debug("Routed to "+country1Alpha3+"/"+country2Alpha3);
+    var country1 = App.allCountries.findByAlpha3(country1Alpha3);
+    var country2 = App.allCountries.findByAlpha3(country2Alpha3);
     if(country1 && country2){
-      window.mapView.handleValidCountryClick(country1);
-      window.mapView.handleValidCountryClick(country2);
+      App.mapView.handleValidCountryClick(country1);
+      App.mapView.handleValidCountryClick(country2);
     } else {
       //TODO
     }

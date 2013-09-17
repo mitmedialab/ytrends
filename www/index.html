@@ -104,27 +104,14 @@
 
 <!-- our application code -->
 <script type="text/Javascript" src="lib/country-util.js" charset="utf-8"></script>
+<script type="text/Javascript" src="app/app.js" charset="utf-8"></script>
 <script type="text/Javascript" src="app/routes.js" charset="utf-8"></script>
 <script type="text/Javascript" src="app/models.js" charset="utf-8"></script>
 <script type="text/Javascript" src="app/views.js" charset="utf-8"></script>
 
 <script type="text/Javascript">
 $(function(){
-  // load the map and data
-  ISO3166.initialize();
-  window.allCountries = new Countries();
-  allCountries.fetch({
-    //url: "data/weights-count.json",
-    //url: "data/weights-jaccard.json",
-    url: "data/weights-bhattacharyya.json",
-    success: function (collection, response, options) {
-      window.countryRouter = new CountryRouter();
-      window.mapView = new MapView();
-      countryRouter.listenTo(mapView,"render.done",function(){
-        Backbone.history.start();
-      });
-    }
-  });
+  App.initialize();
 });
 </script>
 

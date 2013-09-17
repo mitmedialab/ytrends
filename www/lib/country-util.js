@@ -28,7 +28,6 @@ var ISO3166 = {
 	    	ISO3166.numericLookup[parseInt(val['country-code'])] = val;
 	    	ISO3166.alpha3Lookup[val['alpha-3'].toLowerCase()] = val;
 		});
-		console.log("Loaded ISO3166 data");
 	},
 
 	getInfoFromId: function(countryId){
