@@ -387,6 +387,13 @@ App.FullVideoView = Backbone.View.extend({
     el: $('#yt-video-modal'),
     template: _.template($('#yt-full-video-template').html()),
     initialize: function(){
+        App.debug('Fetching info...');
+        _.bindAll(this,'onResultsReturned');
+        $.getJSON('/video/'+this.options.videoId+'/popularity.json',this.onResultsReturned);
+    },
+    onResultsReturned: function(data){
+App.debug(data);
+        this.options.popularity = data;
         this.render();
         this.$el.modal();
     },
@@ -403,6 +410,8 @@ App.FullVideoView = Backbone.View.extend({
         var content = this.template({
             title: t,
             summary: s,
+            mostPopularCountry: ISO3166.getNameFromAlpha3(this.options.popularity.mostPopular.code),
+            mostPopularDays: this.options.popularity.mostPopular.days,
             videoId: this.options.videoId
         });
         this.$el.html( content );

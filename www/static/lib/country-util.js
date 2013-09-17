@@ -44,6 +44,11 @@ var ISO3166 = {
 		return countryInfo['name'];
 	},
 
+	getNameFromAlpha3: function(countryAlpha3){
+		var countryInfo = ISO3166.getInfoFromAlpha3(countryAlpha3);
+		return countryInfo['name'];
+	},
+
 	getInfoFromAlpha3: function(countryAlpha3){
 		if(!(countryAlpha3 in ISO3166.alpha3Lookup)){
 			console.log("unable to find country named "+countryAlpha3);

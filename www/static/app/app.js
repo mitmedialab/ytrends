@@ -5,7 +5,7 @@ window.App = {
     globals: {
         lastAlertTimeout: null,
         normalizeToGlobal: true,
-        writeLog: false
+        writeLog: true
     },
 
     // wrapper so we can turn off logging in one place
