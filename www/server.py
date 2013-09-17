@@ -20,7 +20,7 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(BASE_DIR,CONFIG_FILENAME))
 
 # init the connection to the database
-stats = ytrends.stats.Stats("sqlite:///"+os.path.join(BASE_DIR,config.get('db','path')), False)
+stats = ytrends.stats.Stats("sqlite:///"+os.path.join(BASE_DIR,config.get('db','path'))+"?check_same_thread=False", False)
 log.info("Connected to db at "+config.get('db','path'))
 
 app = Flask(__name__)
