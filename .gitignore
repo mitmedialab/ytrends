@@ -2,3 +2,5 @@
 analysis/app.config
 analysis/*.log
 www/*.log
+www/db/*.sqlite3
+www/*.config

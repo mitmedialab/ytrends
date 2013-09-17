@@ -12,6 +12,7 @@ You also need to install the flask and libraries:
 
 ```
 pip install flask
+pip install sqlalchemy
 ```
 
 Use
