@@ -23,7 +23,7 @@ window.App = {
 
             //url: "data/weights-count.json",
             //url: "data/weights-jaccard.json",
-            url: "data/weights-bhattacharyya.json",
+            url: "static/data/weights-bhattacharyya.json",
 
             success: function (collection, response, options) {
                 App.countryRouter = new App.CountryRouter();

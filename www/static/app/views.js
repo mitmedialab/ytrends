@@ -31,7 +31,7 @@ App.MapView = Backbone.View.extend({
         App.debug("Rendering MapView:started");
         this.$el.html( this.template );
         // Load and render geography
-        d3.json("data/world-110m.json", this._finishRender);
+        d3.json("static/data/world-110m.json", this._finishRender);
     },
     
     _finishRender:function(error, world){
