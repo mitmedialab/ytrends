@@ -8,20 +8,21 @@ import networkx as nx
 
 import ytrends.locations as locs
 import ytrends.graph as graph
-import ytrends.stats as stats
+import ytrends.stats
 import ytrends.weights as weights
 
 VIDEO_COUNT = 10       # will output this many of the top N videos for everything
 
 # Get video stats
+stats = ytrends.stats.Stats()
 day_count_by_country = stats.get_day_count_by_country()
 count_by_loc = stats.get_count_by_loc()
 viewable = stats.get_viewable()
 
 # Calculate inverse document frequency for videos
-videos = set(video_id for by_vid in count_by_loc.values() for video_id in by_vid.keys())
-locs = set(count_by_loc.keys())
-idf = dict((video_id, math.log(len(locs) / sum([1 for l in locs if count_by_loc[l].get(video_id, 0) > 0]))) for video_id in videos)
+videos = stats.get_videos()
+locs = stats.get_locs()
+idf = stats.get_idf()
 
 # Create result dict (for speed)
 jaccard = {}
