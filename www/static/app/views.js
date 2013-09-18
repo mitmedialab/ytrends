@@ -369,8 +369,10 @@ App.FullVideoView = Backbone.View.extend({
         App.debug('Fetching info...');
         _.bindAll(this,'onResultsReturned');
         $.getJSON('/video/'+this.options.videoId+'/popularity.json',this.onResultsReturned);
+        $('#yt-progress-bar').show();
     },
     onResultsReturned: function(data){
+        $('#yt-progress-bar').hide();
         this.options.popularity = data;
         this.render();
         this.$el.modal();
