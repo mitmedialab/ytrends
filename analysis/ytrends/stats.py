@@ -11,7 +11,7 @@ class Stats(object):
     Manage queries against our database (perhaps these methods should be on the models?)
     '''
     
-    def __init__(self, url="sqlite:///db/development.sqlite3", logQueries=True):
+    def __init__(self, url, logQueries=True):
         # init the connection to the database
         self.engine = sqlalchemy.create_engine(url, echo=logQueries)
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
