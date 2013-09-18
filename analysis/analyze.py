@@ -1,12 +1,13 @@
 from operator import itemgetter
+import math
 import sqlalchemy
 import networkx as nx
 
 import ytrends.locations as locs
 import ytrends.graph as graph
 from ytrends.db import *
-import ytrends.stats as stats
-import ytrends.weights as weights
+import ytrends.stats
+import ytrends.weights
 
 # Constants for networkx bipartite graphs
 TOP = 0
@@ -14,6 +15,8 @@ BOTTOM = 1
 
 # Get video stats
 print("Fetching stats")
+stats = ytrends.stats.Stats()
+weights = ytrends.weights.Weight(stats)
 day_count_by_country = stats.get_day_count_by_country()
 count_by_loc = stats.get_count_by_loc()
 videos = set(video_id for by_vid in count_by_loc.values() for video_id in by_vid.keys())
@@ -27,30 +30,29 @@ for loc in locs.countries():
 		name = 'usa'
 	C.add_node(name, type='country', name=loc.name.rstrip())
 for source in count_by_loc.keys():
-	s = source
-	if s == '--':
-		s = 'usa'
 	for target in count_by_loc.keys():
-		t = target
-		if t == '--':
-			t = 'usa'
-		if source > target:
+		if source >= target:
 			continue
-		weight, video_weights = weights.bhattacharyya(count_by_loc[source], count_by_loc[target], day_count_by_country[source], day_count_by_country[target])
+		weight, video_weights = weights.bhattacharyya(source, target)
 		if weight > 0:
-			C.add_edge(s, t, weight=1.0/weight)
-		
-# Find Centrality		
-print("Calculating betweenness centrality for country graph")
-results = nx.betweenness_centrality(C, weight="weight")
+			C.add_edge(source, target, weight=weight, resistance=1/weight)
+			
+# Find Centrality
+
+print("Calculating shortest-path betweenness centrality for country graph")
+results = nx.betweenness_centrality(C, weight="resistance")
 nx.set_node_attributes(C, 'betweenness_centrality', results)
+
+print("Calculating random-walk betweenness centrality for country graph")
+results = nx.current_flow_betweenness_centrality(C, weight="weight")
+nx.set_node_attributes(C, 'random_walk_betweenness_centrality', results)
 #print("Calculating eigenvector centrality for country graph")
 #results = nx.eigenvector_centrality(C, weight="weight")
 #nx.set_node_attributes(C, 'eigenvector_centrality', results)
 with open('output/countries.csv', 'wb') as f:
-	f.write("Code, Name, Betweenness Centrality\n")
+	f.write("Code, Name, Shortest Path Betweenness, Random Walk Betweenness\n")
 	for node in sorted(C.nodes(data=True), key=lambda k: k[1]['betweenness_centrality'], reverse=True):
-		f.write("%s, %s, %f\n" % (node[0], node[1]['name'], node[1]['betweenness_centrality']))
+		f.write("%s, %s, %f, %f\n" % (node[0], node[1]['name'], node[1]['betweenness_centrality'], node[1]['random_walk_betweenness_centrality']))
 		
 # Create bipartite graph
 print("Creating bipartite country-video graph")
