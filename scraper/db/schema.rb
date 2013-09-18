@@ -37,10 +37,10 @@ ActiveRecord::Schema.define(:version => 20130918150709) do
     t.string   "geo"
     t.integer  "duration"
     t.integer  "views"
-    t.decimal  "rating"
+    t.decimal  "rating",         :precision => 10, :scale => 0
     t.date     "published_date"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
+    t.datetime "created_at",                                    :null => false
+    t.datetime "updated_at",                                    :null => false
   end
 
   add_index "videos", ["id"], :name => "index_videos_on_id", :unique => true
