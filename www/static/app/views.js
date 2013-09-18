@@ -179,11 +179,12 @@ App.MapView = Backbone.View.extend({
             .append("path")
             .attr("class", "yt-country")
             .attr("fill", App.globals.colors.disabledColor)
-            .attr("stroke", "rgb(255,255,255)")
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
             .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
             .on("click", function (d) { return that.handleValidCountryClick(d); });
+        g.attr("stroke-width", "1")
+            .attr("stroke", "rgb(255,255,255)")
         g.transition()
             .attr("fill", App.globals.colors.enabledColor)
             .attr("stroke", "rgb(255,255,255)")
@@ -258,6 +259,10 @@ App.MapView = Backbone.View.extend({
             .transition()
             .attr('stroke', this.selectedColor)
             .attr('stroke-width', '2');
+        // Raise z-index by moving to end, allows whole border to be seen
+        var node = $('#yt-country' + country.id);
+        node.remove();
+        $('#yt-data').append(node);
     },
     
     unhighlightCountry: function(country){
