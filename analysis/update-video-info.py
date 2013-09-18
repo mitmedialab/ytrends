@@ -1,16 +1,14 @@
-import dateutil.parser
-import datetime
-import ConfigParser
-import logging
-import sys
+import dateutil.parser, datetime, time
+import ConfigParser, logging, sys
 import sqlalchemy
+import gdata.youtube, gdata.youtube.service
+
 from ytrends.db import *
-import gdata.youtube
-import gdata.youtube.service
+from ytrends import stats
 
 # read in app config
 CONFIG_FILENAME = 'app.config'
-MAX_VIDEOS_TO_PROCESS = 100
+MAX_VIDEOS_TO_PROCESS = 50
 config = ConfigParser.ConfigParser()
 config.read(CONFIG_FILENAME)
 
@@ -20,9 +18,7 @@ log = logging.getLogger('ytrends')
 log.info("---------------------------------------------------------------------------")
 
 # init the connection to the database
-engine = sqlalchemy.create_engine("sqlite:///"+config.get('db','path'), echo=True)
-Session = sqlalchemy.orm.sessionmaker(bind=engine)
-session = Session()
+stats = stats.Stats("sqlite:///"+config.get('db','path'))
 log.info("Connected to db at "+config.get('db','path'))
 
 # connect to youtube api
@@ -33,13 +29,7 @@ yt_service.client_id = config.get('youtube','client_id')
 log.info("Connected to youtube")
 
 # find videos that don't have metadata
-new_videos = session.query(Rank.video_id).\
-    filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
-    filter_by(source='view').\
-    outerjoin(Video).\
-    group_by(Rank.video_id).\
-    having(sqlalchemy.sql.func.count(Video.id)==0).\
-    limit(MAX_VIDEOS_TO_PROCESS)    
+new_videos = stats.get_videos_without_metadata(MAX_VIDEOS_TO_PROCESS)
 
 for video in new_videos:
     video_id = video[0]
@@ -76,8 +66,9 @@ for video in new_videos:
             v.rating = entry.rating.average
         if entry.published is not None:
             v.published_date = dateutil.parser.parse(entry.published.text)
-    session.add(v)
-    session.commit()
+    stats.session.add(v)
+    stats.session.commit()
     log.info("  saved"+video_id)
+    time.sleep(1)
 
 log.info("Done!")

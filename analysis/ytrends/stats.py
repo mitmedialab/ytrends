@@ -129,3 +129,12 @@ class Stats(object):
         for rank in ranks:
             count_by_loc[rank[0]] = rank[1]
         return count_by_loc
+
+    def get_videos_without_metadata(self, count):
+        return self.session.query(Rank.video_id).\
+            filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+            filter_by(source='view').\
+            outerjoin(Video).\
+            group_by(Rank.video_id).\
+            having(sqlalchemy.sql.func.count(Video.id)==0).\
+            limit(count)
