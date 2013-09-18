@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130911171029) do
+ActiveRecord::Schema.define(:version => 20130918150709) do
 
   create_table "ranks", :force => true do |t|
     t.string   "source"
@@ -22,6 +22,10 @@ ActiveRecord::Schema.define(:version => 20130911171029) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
+
+  add_index "ranks", ["loc"], :name => "index_ranks_on_loc"
+  add_index "ranks", ["source"], :name => "index_ranks_on_source"
+  add_index "ranks", ["video_id"], :name => "index_ranks_on_video_id"
 
   create_table "videos", :id => false, :force => true do |t|
     t.string   "id"
@@ -38,5 +42,7 @@ ActiveRecord::Schema.define(:version => 20130911171029) do
     t.datetime "created_at",     :null => false
     t.datetime "updated_at",     :null => false
   end
+
+  add_index "videos", ["id"], :name => "index_videos_on_id", :unique => true
 
 end
