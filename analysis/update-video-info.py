@@ -8,7 +8,7 @@ from ytrends import stats
 
 # read in app config
 CONFIG_FILENAME = 'app.config'
-MAX_VIDEOS_TO_PROCESS = 50
+MAX_VIDEOS_TO_PROCESS = 100
 config = ConfigParser.ConfigParser()
 config.read(CONFIG_FILENAME)
 
