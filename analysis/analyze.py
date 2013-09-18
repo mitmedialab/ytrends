@@ -2,6 +2,7 @@ from operator import itemgetter
 import math
 import sqlalchemy
 import networkx as nx
+import ConfigParser
 
 import ytrends.locations as locs
 import ytrends.graph as graph
@@ -13,9 +14,16 @@ import ytrends.weights
 TOP = 0
 BOTTOM = 1
 
+# read in app config
+CONFIG_FILENAME = 'app.config'
+MAX_VIDEOS_TO_PROCESS = 100
+config = ConfigParser.ConfigParser()
+config.read(CONFIG_FILENAME)
+
 # Get video stats
 print("Fetching stats")
-stats = ytrends.stats.Stats()
+stats = ytrends.stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
+    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
 weights = ytrends.weights.Weight(stats)
 day_count_by_country = stats.get_day_count_by_country()
 count_by_loc = stats.get_count_by_loc()

@@ -4,6 +4,7 @@ import math
 from operator import itemgetter
 import sys
 import json
+import ConfigParser
 import networkx as nx
 
 import ytrends.locations as locs
@@ -13,8 +14,15 @@ import ytrends.weights
 
 VIDEO_COUNT = 10       # will output this many of the top N videos for everything
 
+# read in app config
+CONFIG_FILENAME = 'app.config'
+MAX_VIDEOS_TO_PROCESS = 100
+config = ConfigParser.ConfigParser()
+config.read(CONFIG_FILENAME)
+
 # Get video stats
-stats = ytrends.stats.Stats()
+stats = ytrends.stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
+    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
 day_count_by_country = stats.get_day_count_by_country()
 count_by_loc = stats.get_count_by_loc()
 viewable = stats.get_viewable()

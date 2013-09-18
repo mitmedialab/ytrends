@@ -18,8 +18,9 @@ log = logging.getLogger('ytrends')
 log.info("---------------------------------------------------------------------------")
 
 # init the connection to the database
-stats = stats.Stats("sqlite:///"+config.get('db','path'))
-log.info("Connected to db at "+config.get('db','path'))
+stats = stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
+    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
+log.info("Connected to db")
 
 # connect to youtube api
 yt_service = gdata.youtube.service.YouTubeService()

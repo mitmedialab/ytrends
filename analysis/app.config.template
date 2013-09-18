@@ -1,6 +1,9 @@
 [youtube]
 developer_key: MAGIC_KEY
-client_id: MY_ID
+client_id: whatwewatch
 
 [db]
-path: db/development.sqlite3
+host: 127.0.0.1
+user: ytrends
+pass: ytrends
+name: ytrends_dev
