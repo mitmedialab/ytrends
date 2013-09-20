@@ -377,11 +377,15 @@ App.VideoItemView = Backbone.View.extend({
 });
 
 App.FullVideoView = Backbone.View.extend({
-    el: $('#yt-video-modal'),
+    //el: $('#yt-video-modal'),
+    tagName: 'div',
+    className: 'modal',
+    id: 'yt-video-modal',
     template: _.template($('#yt-full-video-template').html()),
     initialize: function(){
         App.debug('Fetching info...');
-        _.bindAll(this,'onResultsReturned');
+        _.bindAll(this,'onResultsReturned',
+            'onClosing');
         $.getJSON('/video/'+this.options.videoId+'/popularity.json',this.onResultsReturned);
         $('#yt-progress-bar').show();
     },
@@ -389,10 +393,13 @@ App.FullVideoView = Backbone.View.extend({
         $('#yt-progress-bar').hide();
         this.options.popularity = data;
         this.render();
-        var that = this;
-        $('#yt-video-modal').on('shown.bs.modal', function() {
-        });
-        this.$el.modal();
+        this.$el.on('hidden.bs.modal', this.onClosing);
+        this.$el.modal();        
+    },
+    onClosing: function(){
+        var route = Backbone.history.fragment;
+        route = route.substr(0,route.indexOf('v/'));
+        App.countryRouter.navigate(route);
     },
     render: function(){
         App.debug("rendering FullVideoView "+this.options.videoId);
