@@ -54,7 +54,7 @@ App.CountryRouter = Backbone.Router.extend({
         if(country1 && country2){
             App.mapView.handleValidCountryClick(country1,true);
             _.delay(function(){App.mapView.handleValidCountryClick(country2,true);},
-                500);            
+                250);            
         } else {
             //TODO
         }
