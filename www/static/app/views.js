@@ -380,6 +380,14 @@ App.FullVideoView = Backbone.View.extend({
         $('#yt-progress-bar').hide();
         this.options.popularity = data;
         this.render();
+        var that = this;
+        $('#yt-video-modal').on('shown.bs.modal', function() {
+            // This is to fix a bug positioning the video embed in chrome, we should find a better way.
+            $('.modal-dialog iframe').attr('src', 'http://www.youtube.com/embed/' + that.options.videoId + '?rel=0');
+            $('.modal-dialog', that.$el).hide();
+            $('.modal-dialog', that.$el).removeClass('hide');
+            $('.modal-dialog', that.$el).fadeIn();
+        });
         this.$el.modal();
     },
     render: function(){
