@@ -111,7 +111,7 @@ App.MapView = Backbone.View.extend({
         // click on first country
         if(!this.selected) {
             App.debug("  first country click");
-            if(typeof fromRouterApp==undefined) App.countryRouter.navigate(country.get('code'));
+            if(fromRouter!=true) App.countryRouter.navigate(country.get('code'));
             this.selected = country;
             // show info about country
             new App.InfoBoxView({ country: this.selected});
@@ -121,7 +121,7 @@ App.MapView = Backbone.View.extend({
         //clicked on related country
         } else if(country.id !== this.selected.id) {
             App.debug("  second country click");
-            if(typeof fromRouterApp==undefined) App.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
+            if(fromRouter!=true) App.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
             this.updateRelated(country);
             //this._showCountryName(country.id);
             //var videos = this.selected.getVideosInCommonWith(country.id);
