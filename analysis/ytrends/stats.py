@@ -28,14 +28,15 @@ class Stats(object):
     def __init__(self, url, logQueries=True):
         # init the connection to the database
         self.engine = sqlalchemy.create_engine(url, echo=logQueries)
-        sqlalchemy.event.listen(self.engine, 'checkout', checkout_listener)
+        if 'mysql' in url:
+            sqlalchemy.event.listen(self.engine, 'checkout', checkout_listener)
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
         
     
     def clean_loc(self, loc):
         if loc == '--':
-            return 'usa'
+            return u'usa'
         return loc
     
     def get_viewable(self):
@@ -115,7 +116,12 @@ class Stats(object):
             return self.locs
         except AttributeError:
             pass
-        self.locs = set(self.get_count_by_loc().keys())
+        locs = self.session.query(sqlalchemy.sql.func.distinct(Rank.loc)).\
+            filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+            filter_by(source='view')
+        self.locs = []
+        for loc in locs:
+            self.locs.append(self.clean_loc(loc[0]))
         return self.locs
     
     def get_idf(self):

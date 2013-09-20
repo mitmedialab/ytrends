@@ -15,4 +15,4 @@ class Mock(object):
         return json.loads(count_by_loc)
 
     def  get_locs(self):
-    	return set(self.get_day_count_by_country().keys())
+    	return self.get_day_count_by_country().keys()

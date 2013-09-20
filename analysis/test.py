@@ -19,7 +19,7 @@ try:
     print("Passed")
 
     print("Checking get_locs")
-    assert stats.get_locs() == mock.get_locs()
+    assert len(set(stats.get_locs()) ^ set(mock.get_locs()))==0
     print("Passed")
 
 except AssertionError:
