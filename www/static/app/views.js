@@ -377,7 +377,6 @@ App.VideoItemView = Backbone.View.extend({
 });
 
 App.FullVideoView = Backbone.View.extend({
-    //el: $('#yt-video-modal'),
     tagName: 'div',
     className: 'modal',
     id: 'yt-video-modal',
