@@ -11,9 +11,14 @@ CONFIG_FILENAME = 'app.config'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # setup logging
+handler = logging.FileHandler('server.log')
 logging.basicConfig(filename='server.log',level=logging.DEBUG)
 log = logging.getLogger('server')
 log.info("---------------------------------------------------------------------------")
+sqla_log = logging.getLogger('sqlalchemy.engine.base.Engine')
+sqla_log.addHandler(handler)
+sqla_log.propagate = False
+
 
 # read in app config
 config = ConfigParser.ConfigParser()
