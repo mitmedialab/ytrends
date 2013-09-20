@@ -17,5 +17,10 @@ try:
     print("Checking couty_by_loc")
     assert stats.get_count_by_loc() == mock.get_count_by_loc()
     print("Passed")
+
+    print("Checking get_locs")
+    assert stats.get_locs() == mock.get_locs()
+    print("Passed")
+
 except AssertionError:
     print("Assertion failed")
