@@ -1,7 +1,7 @@
 YouTube Trends Scraper
 ======================
 
-A simple ruby library to scrape all the YouTube Trends data in to a SQLite database.
+A simple ruby library to scrape all the YouTube Trends data in to a MySQL database.
 
 Installation
 ------------
@@ -11,7 +11,7 @@ First install the dependencies
 bundle install
 ```
 
-Next setup the database
+Next setup the database by editing the `db/config.yml` and then creating the tables:
 ```
 rake db:migrate
 ```
@@ -23,6 +23,7 @@ To load the latest rankings from youtube, do this
 ```
 ruby -Ilib scrape-rankings.rb
 ```
+We run this every night (via a cron job on our server).
 
 Testing
 -------
@@ -35,9 +36,10 @@ rake test
 Locations
 ---------
 
-The initial list of locations was seeded by running the following JQuery statement 
-from the browser console on the YouTube Trends webpage:
+The initial list of locations was seeded by running JQuery-fying the 
+[YouTube Trends webpage](http://www.youtube.com/trendsdashboard) and then running this code
+in the JS console:
 ```
 $('select[data-hash=loc0] option').map(function() { return $(this).val()+"|"+$(this).text();}).get();
 ```
-and then cleaning it up via a few regular expressions in a text editor
+Then we cleaned it up via a few regular expressions in a text editor.

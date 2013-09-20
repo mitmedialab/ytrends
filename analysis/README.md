@@ -1,7 +1,7 @@
 YouTube Trends Analysis
 =======================
 
-Basic analysis support for scraped YTrends data.
+Basic analysis support for scraped YTrends data. This reads and writes to a MySQL database.
 
 Installation
 ------------
@@ -25,13 +25,18 @@ connection info.
 Running
 -------
 
-One script adds video metadata to the database.  Run this on a cron every 
-minute to fill in the videos table:
-```
-python update-video-info.py
-```
+There are a few scripts here:
 
-Another script generates some JSON with results, in the `output folder`:
-```
-python createjson.py
-```
+`createjson.py`
+
+This is the main analysis script.  This calculate various centrality metrics and 
+saves the info as json files can be used in the web-app.
+
+`update-video-info.py`
+
+This adds video metadata to the database.  Run this on a cron every minute to fill 
+in the videos table of the database.
+
+`test.py`
+
+This runs some simple unit tests.

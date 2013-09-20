@@ -1,7 +1,9 @@
 What we Watch Server
 ====================
 
-Small server to showcase data we gathered from YouTube Trends.
+Small server to showcase data we gathered from YouTube Trends.  This website is built around
+the Backbone.js library for in-browser MVC.  We dropped that into a Flask server when we found that
+we did need to talk to the MySQL database.
 
 Installation
 ------------
