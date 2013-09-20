@@ -398,7 +398,11 @@ App.FullVideoView = Backbone.View.extend({
     },
     onClosing: function(){
         var route = Backbone.history.fragment;
-        route = route.substr(0,route.indexOf('v/'));
+        if(route.indexOf('v/')==0){
+            route = '';
+        } else {
+            route = route.substr(0,route.indexOf('v/')-1);
+        }
         App.countryRouter.navigate(route);
     },
     render: function(){
