@@ -53,7 +53,8 @@ App.CountryRouter = Backbone.Router.extend({
         var country2 = App.allCountries.findByAlpha3(country2Alpha3);
         if(country1 && country2){
             App.mapView.handleValidCountryClick(country1,true);
-            App.mapView.handleValidCountryClick(country2,true);
+            _.delay(function(){App.mapView.handleValidCountryClick(country2,true);},
+                500);            
         } else {
             //TODO
         }
