@@ -1,3 +1,4 @@
+from __future__ import division
 from operator import itemgetter
 import math
 import sqlalchemy
@@ -31,11 +32,13 @@ videos = set(video_id for by_vid in count_by_loc.values() for video_id in by_vid
 
 # set up the weighted association graph with all the countries
 print("Constructing country graph")
+code_to_name = {}
 C = nx.Graph()
 for loc in locs.countries():
 	name = loc.code
 	if loc.code == '--':
 		name = 'usa'
+	code_to_name[name] = loc.name.rstrip()
 	C.add_node(name, type='country', name=loc.name.rstrip())
 for source in count_by_loc.keys():
 	for target in count_by_loc.keys():
@@ -45,6 +48,28 @@ for source in count_by_loc.keys():
 		if weight > 0:
 			C.add_edge(source, target, weight=weight, resistance=1/weight)
 			
+# Find shortest paths
+def write_shortest_paths(path_code):
+	path_code = 'are'
+	endpoints = {}
+	nodes = C.nodes()
+	for source in nodes:
+		for target in nodes:
+			if target >= source or not C.get_edge_data(source, target):
+				continue
+			paths = nx.all_shortest_paths(C, source, target, weight='resistance')
+			for path in paths:
+				if len(path) > 2 and path_code in path[1:-1]:
+					distances = [C.get_edge_data(p[0], p[1])['resistance'] for p in zip(path, path[1:])]
+					length = sum(distances)
+					direct = C.get_edge_data(source, target)['resistance']
+					endpoints[source] = endpoints.get(source,0) + 1
+					endpoints[target] = endpoints.get(target,0) + 1
+	with open('output/%s.csv' % path_code, 'wb') as f:
+		f.write("Endpoint, Paths using %s as bridge\n" % code_to_name[path_code])
+		for k,v in endpoints.iteritems():
+			f.write("%s, %d\n" % (code_to_name[k], v))
+
 # Find Centrality
 
 print("Calculating shortest-path betweenness centrality for country graph")
