@@ -391,11 +391,6 @@ App.FullVideoView = Backbone.View.extend({
         this.render();
         var that = this;
         $('#yt-video-modal').on('shown.bs.modal', function() {
-            // This is to fix a bug positioning the video embed in chrome, we should find a better way.
-            $('.modal-dialog iframe').attr('src', 'http://www.youtube.com/embed/' + that.options.videoId + '?rel=0');
-            $('.modal-dialog', that.$el).hide();
-            $('.modal-dialog', that.$el).removeClass('hide');
-            $('.modal-dialog', that.$el).fadeIn();
         });
         this.$el.modal();
     },
@@ -456,6 +451,7 @@ App.FullVideoView = Backbone.View.extend({
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
             .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
+            .attr("fill", "#eee")
         countries.exit()
             .remove();
         countries
