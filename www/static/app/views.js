@@ -440,6 +440,7 @@ App.FullVideoView = Backbone.View.extend({
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
             .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
+            .attr("fill", "#eee")
         countries.exit()
             .remove();
         countries
