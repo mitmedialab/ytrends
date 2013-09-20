@@ -498,7 +498,7 @@ App.InfoBoxView = Backbone.View.extend({
     },
     handleTabs: function(evt){
         $(evt.target).tab('show');
-        e.preventDefault();
+        evt.preventDefault();
     },
     handleRelatedCountry: function(evt){
         var countryId = $(evt.target).attr('data-country-id');
