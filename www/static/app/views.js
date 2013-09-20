@@ -100,7 +100,7 @@ App.MapView = Backbone.View.extend({
         d3.event.stopPropagation();
     },
 
-    handleValidCountryClick: function(country){
+    handleValidCountryClick: function(country, fromRouter){
         App.debug('Clicked ' + country.id);
         if(!('cid' in country)){    // gotta turn this into a country model object, since rederRelated uses the video info
             country = App.allCountries.get(country.id);
@@ -111,7 +111,7 @@ App.MapView = Backbone.View.extend({
         // click on first country
         if(!this.selected) {
             App.debug("  first country click");
-            App.countryRouter.navigate(country.get('code'));
+            if(typeof fromRouterApp==undefined) App.countryRouter.navigate(country.get('code'));
             this.selected = country;
             // show info about country
             new App.InfoBoxView({ country: this.selected});
@@ -121,7 +121,7 @@ App.MapView = Backbone.View.extend({
         //clicked on related country
         } else if(country.id !== this.selected.id) {
             App.debug("  second country click");
-            App.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
+            if(typeof fromRouterApp==undefined) App.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
             this.updateRelated(country);
             //this._showCountryName(country.id);
             //var videos = this.selected.getVideosInCommonWith(country.id);
@@ -358,11 +358,20 @@ App.VideoItemView = Backbone.View.extend({
         this.$el.html( content );
     },
     showVideo: function(evt){
+        var videoId = $(evt.target).attr('data-video-id');
+        if(this.options.country1==null && this.options.country2==null){
+            App.countryRouter.navigate(this.options.videoId);
+        } else if (this.options.country2==null){
+            App.countryRouter.navigate(this.options.country1.get('code')+"/v/"+this.options.videoId);
+        } else {
+            App.countryRouter.navigate(this.options.country1.get('code')+"/"+this.options.country2.get('code')+"/v/"+this.options.videoId);
+        }
+        
         new App.FullVideoView({ 
             country1: this.options.country1,
             country2: this.options.country2,
             dayPct: this.options.dayPct,
-            videoId: $(evt.target).attr('data-video-id')
+            'videoId': videoId
         });
     }
 });
@@ -396,9 +405,11 @@ App.FullVideoView = Backbone.View.extend({
         if(this.options.country2!=null) {
             t = this.options.country1.get("name")+" and "+this.options.country2.get("name")+" both watched this";
             s = "";
-        } else {
+        } else if(this.options.country1!=null){
             t = this.options.country1.get("name")+" watched this";
             s = "This was on the top trending list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
+        } else {
+            t = "Who is Watching?"
         }
         var content = this.template({
             title: t,
