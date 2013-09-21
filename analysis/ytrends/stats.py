@@ -27,7 +27,7 @@ class Stats(object):
     
     def __init__(self, url, logQueries=True):
         # init the connection to the database
-        self.engine = sqlalchemy.create_engine(url, echo=logQueries)
+        self.engine = sqlalchemy.create_engine(url, echo=logQueries, pool_size=100, pool_recycle=3600)
         if 'mysql' in url:
             sqlalchemy.event.listen(self.engine, 'checkout', checkout_listener)
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
