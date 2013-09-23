@@ -576,6 +576,6 @@ App.InfoBoxView = Backbone.View.extend({
 App.InfoBoxView.Welcome = function(){
     new App.InfoBoxView({ 
         title: "Explore the Map",
-        content: '<p>Click on a country to see which other countries watched similar videos.  The darker the country, the more they have in common.  Click a second country to see what videos are popular in both places.</p><p>Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p><p><small>Curious? Email whatwewatch&#64;media.mit.edu</small></p>'
+        content: '<p>Click on a country to see which other countries watched similar videos.  The darker the country, the more they have in common.  Click a second country to see what videos are popular in both places.</p><p>Read about <a href="http://www.ethanzuckerman.com/blog/2013/09/23/what-we-watch-a-new-tool-for-watching-how-popular-videos-spread-online/">our first insights</a> to learn more. Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p><p><small>Curious? Email whatwewatch&#64;media.mit.edu</small></p>'
     });
 };
