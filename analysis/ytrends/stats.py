@@ -6,30 +6,14 @@ import sqlalchemy
 
 from ytrends.db import *
 
-# For checking mysql connection freshness, see:
-# http://stackoverflow.com/questions/18054224/python-sqlalchemy-mysql-server-has-gone-away
-def checkout_listener(dbapi_con, con_record, con_proxy):
-    try:
-        try:
-            dbapi_con.ping(False)
-        except TypeError:
-            dbapi_con.ping()
-    except dbapi_con.OperationalError as exc:
-        if exc.args[0] in (2006, 2013, 2014, 2045, 2055):
-            raise sqlalchemy.exc.DisconnectionError()
-        else:
-            raise
-
 class Stats(object):
     '''
     Manage queries against our database (perhaps these methods should be on the models?)
     '''
     
-    def __init__(self, url, logQueries=True):
+    def __init__(self, engine):
         # init the connection to the database
-        self.engine = sqlalchemy.create_engine(url, echo=logQueries, pool_size=100, pool_recycle=3600)
-        if 'mysql' in url:
-            sqlalchemy.event.listen(self.engine, 'checkout', checkout_listener)
+        self.engine = engine
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
     

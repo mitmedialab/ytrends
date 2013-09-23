@@ -1,9 +1,11 @@
+import sqlalchemy
 import ytrends.stats
 import ytrends.mock
 
 try:
     print("Creating mocks")
-    stats = ytrends.stats.Stats("sqlite:///db/test.sqlite")
+    engine = sqlalchemy.create_engine("sqlite:///db/test.sqlite", echo=True)
+    stats = ytrends.stats.Stats(engine)
     mock = ytrends.mock.Mock()
     
     print("Checking viewable")

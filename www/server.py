@@ -25,9 +25,27 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(BASE_DIR,CONFIG_FILENAME))
 
 # init the connection to the database
-stats_url = "mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+\
-    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8"
-
+def checkout_listener(dbapi_con, con_record, con_proxy):
+    # For checking mysql connection freshness, see:
+    # http://stackoverflow.com/questions/18054224/python-sqlalchemy-mysql-server-has-gone-away
+    try:
+        try:
+            dbapi_con.ping(False)
+        except TypeError:
+            dbapi_con.ping()
+    except dbapi_con.OperationalError as exc:
+        if exc.args[0] in (2006, 2013, 2014, 2045, 2055):
+            raise sqlalchemy.exc.DisconnectionError()
+        else:
+            raise
+stats_url = "mysql+mysqldb://%s:%s@%s/%s?charset=utf8" % (
+    config.get('db','user')
+    , config.get('db','pass')
+    , config.get('db','host')
+    , config.get('db','name')
+)
+stats_engine = sqlalchemy.create_engine(stats_url, echo=True, pool_size=100, pool_recycle=3600)
+sqlalchemy.event.listen(stats_engine, 'checkout', checkout_listener)
 app = Flask(__name__)
 
 @app.route("/")
@@ -36,7 +54,7 @@ def index():
 
 @app.route("/video/<video_id>/popularity.json")
 def video_popularity(video_id):
-    stats = ytrends.stats.Stats(stats_url)
+    stats = ytrends.stats.Stats(stats_engine)
     log.info("Connected to db")
     popularity = stats.get_video_popularity(video_id)
     if '--' in popularity.keys():
