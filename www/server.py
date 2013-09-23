@@ -36,7 +36,7 @@ def index():
 
 @app.route("/video/<video_id>/popularity.json")
 def video_popularity(video_id):
-    stats = ytrends.stats.Stats()
+    stats = ytrends.stats.Stats(stats_url)
     log.info("Connected to db")
     popularity = stats.get_video_popularity(video_id)
     if '--' in popularity.keys():
