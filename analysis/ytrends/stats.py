@@ -32,7 +32,11 @@ class Stats(object):
             sqlalchemy.event.listen(self.engine, 'checkout', checkout_listener)
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
-        
+    
+    def __del__(self):
+        # Explicitly close session
+        # https://groups.google.com/forum/#!topic/sqlalchemy/qAMe78TV0M0
+        self.session.close()
     
     def clean_loc(self, loc):
         if loc == '--':

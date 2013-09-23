@@ -25,9 +25,8 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(BASE_DIR,CONFIG_FILENAME))
 
 # init the connection to the database
-stats = ytrends.stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
-    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
-log.info("Connected to db")
+stats_url = "mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+\
+    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8"
 
 app = Flask(__name__)
 
@@ -37,6 +36,8 @@ def index():
 
 @app.route("/video/<video_id>/popularity.json")
 def video_popularity(video_id):
+    stats = ytrends.stats.Stats()
+    log.info("Connected to db")
     popularity = stats.get_video_popularity(video_id)
     if '--' in popularity.keys():
         popularity['usa'] = popularity['--']
