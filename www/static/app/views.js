@@ -412,7 +412,9 @@ App.FullVideoView = Backbone.View.extend({
             s = "";
         } else if(this.options.country1!=null){
             t = this.options.country1.get("name")+" watched this";
-            s = "This was on the top trending list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
+            if(this.options.dayPct>0){
+                s = "This was on the top trending list in "+this.options.country1.get("name")+" for "+this.options.dayPct+"% of the days we've tracked.";
+            }
         } else {
             t = "Who is Watching?"
         }
