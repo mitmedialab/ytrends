@@ -23,8 +23,14 @@ config.read(CONFIG_FILENAME)
 
 # Get video stats
 print("Fetching stats")
-stats = ytrends.stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
-    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
+stats_url = "mysql+mysqldb://%s:%s@%s/%s?charset=utf8" % (
+    config.get('db','user')
+    , config.get('db','pass')
+    , config.get('db','host')
+    , config.get('db','name')
+)
+stats_engine = sqlalchemy.create_engine(stats_url, echo=True, pool_size=100, pool_recycle=3600)
+stats = ytrends.stats.Stats(stats_engine)
 weights = ytrends.weights.Weight(stats)
 day_count_by_country = stats.get_day_count_by_country()
 count_by_loc = stats.get_count_by_loc()
