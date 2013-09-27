@@ -1,9 +1,12 @@
 from __future__ import division
-from operator import itemgetter
-import math
-import sqlalchemy
-import networkx as nx
+
 import ConfigParser
+import datetime
+import math
+import networkx as nx
+from operator import itemgetter
+
+import sqlalchemy
 
 import ytrends.locations as locs
 import ytrends.graph as graph
@@ -75,6 +78,41 @@ def write_shortest_paths(path_code):
 		f.write("Endpoint, Paths using %s as bridge\n" % code_to_name[path_code])
 		for k,v in endpoints.iteritems():
 			f.write("%s, %d\n" % (code_to_name[k], v))
+
+# Find video spreads
+spread_ids = {
+	'CevxZvSJLk8': 'Katy Perry - Roar (Official)'
+	, 'ahy3uRzRG9w': 'Hangouts: Conversations that last, with the people you love'
+	, 'ttdU19Kwce8': 'P-Square - Personally'
+}
+for video_id, title in spread_ids.iteritems():
+	with open('output/%s-%s.csv' % (video_id, title), 'wb') as f:
+		spread = stats.get_spread(video_id)
+		# Calculate date range
+		first_date = min([min(spread[loc].keys()) for loc in spread.keys()])
+		last_date = max([max(spread[loc].keys()) for loc in spread.keys()])
+		delta = last_date - first_date
+		days = delta.days + 1
+		print days
+		dates = [first_date + datetime.timedelta(n) for n in range(days)]
+		print dates
+		# Write headers
+		f.write('Country,')
+		f.write("%s\n" % ','.join([date.strftime('%Y-%m-%d') for date in dates]))
+		# Write data
+		rows = {}
+		sort_ranks = []
+		for loc, rank_dict in spread.iteritems():
+			# Build output string
+			ranks = [str(rank_dict.get(date, '')) for date in dates]
+			rows[loc] = '%s,%s\n' % (code_to_name[loc], ','.join(ranks))
+			# Create feature for sorting
+			trend_days = [min(1, rank_dict.get(date, 0)) for date in dates]
+			first_index = trend_days.index(1)
+			last_index = len(trend_days) - 1 - list(reversed(trend_days)).index(1)
+			sort_ranks.append((loc, (first_index, last_index)))
+		for loc, feature in sorted(sort_ranks, key=lambda x: x[1]):
+			f.write(rows[loc])
 
 # Find Centrality
 

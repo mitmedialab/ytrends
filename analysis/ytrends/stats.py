@@ -148,3 +148,19 @@ class Stats(object):
             group_by(Rank.video_id).\
             having(sqlalchemy.sql.func.count(Video.id)==0).\
             limit(count)
+
+    def get_spread(self, video_id):
+        '''
+        Returns a dictionary mapping country and date to rank for a single video.
+        '''
+        ranks = self.session.query(Rank.loc, Rank.date, Rank.rank).\
+            filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+            filter_by(video_id=video_id).\
+            filter_by(source='view')
+        results = {}
+        for loc, date, rank in ranks:
+            loc = self.clean_loc(loc)
+            results[loc] = results.get(loc, {})
+            results[loc][date] = rank
+        return results
+    
