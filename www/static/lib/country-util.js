@@ -11,7 +11,7 @@ var Centroid = {
 };
 
 /**
- * Country name, alpha3, and id number from the ISO3166 standard
+ * Country name, alpha3, and id number from the ISO3166 standard (names from wikipedia list of recognized nations)
  */
 var ISO3166 = {
 
