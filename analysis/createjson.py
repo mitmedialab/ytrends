@@ -1,11 +1,13 @@
 from __future__ import division
 
+import ConfigParser
+import json
 import math
 from operator import itemgetter
 import sys
-import json
-import ConfigParser
+
 import networkx as nx
+import sqlalchemy
 
 import ytrends.locations as locs
 import ytrends.graph as graph
@@ -20,25 +22,8 @@ MAX_VIDEOS_TO_PROCESS = 100
 config = ConfigParser.ConfigParser()
 config.read(CONFIG_FILENAME)
 
-# Get video stats
-stats = ytrends.stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
-    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
-day_count_by_country = stats.get_day_count_by_country()
-count_by_loc = stats.get_count_by_loc()
-viewable = stats.get_viewable()
-
-# Calculate inverse document frequency for videos
-videos = stats.get_videos()
-locs = stats.get_locs()
-idf = stats.get_idf()
-
-# Create result dict (for speed)
-weights = ytrends.weights.Weight(stats)
-jaccard = weights.get_weights(weights.jaccard)
-bhattacharyya = weights.get_weights(weights.bhattacharyya)
-count = weights.get_weights(weights.count)
-
-def write_results (results, name):
+def write_results (stats, results, name):
+    count_by_loc = stats.get_count_by_loc()
     idf = stats.get_idf()
     day_count_by_country = stats.get_day_count_by_country()
     viewable = stats.get_viewable()
@@ -65,7 +50,25 @@ def write_results (results, name):
     
     with open('output/weights-%s.json' % (name), 'wb') as f:
         f.write(json.dumps(result_list))
-        
-write_results(count, 'count')
-write_results(jaccard, 'jaccard')
-write_results(bhattacharyya, 'bhattacharyya')
+
+# Create database engine
+stats_url = "mysql+mysqldb://%s:%s@%s/%s?charset=utf8" % (
+    config.get('db','user')
+    , config.get('db','pass')
+    , config.get('db','host')
+    , config.get('db','name')
+)
+stats_engine = sqlalchemy.create_engine(stats_url, echo=True, pool_size=100, pool_recycle=3600)
+
+periods = [0, 7, 30]
+for period in periods:
+    # Get video stats
+    stats = ytrends.stats.Stats(stats_engine, period)
+    
+    # Create and write results
+    weights = ytrends.weights.Weight(stats)
+    bhattacharyya = weights.get_weights(weights.bhattacharyya)
+    if period > 0:
+        write_results(stats, bhattacharyya, 'bhattacharyya-%d' % (period))
+    else:
+        write_results(stats, bhattacharyya, 'bhattacharyya')

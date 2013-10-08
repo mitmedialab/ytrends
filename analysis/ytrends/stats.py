@@ -11,11 +11,17 @@ class Stats(object):
     Manage queries against our database (perhaps these methods should be on the models?)
     '''
     
-    def __init__(self, engine):
+    def __init__(self, engine, days=0):
+        '''
+        Initialize.
+        :param engine: sqlalchemy database engine
+        :param days=0: number of most recent days to include or 0 for all days
+        '''
         # init the connection to the database
         self.engine = engine
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
+        self.days = days
     
     def __del__(self):
         # Explicitly close session
@@ -26,6 +32,16 @@ class Stats(object):
         if loc == '--':
             return u'usa'
         return loc
+    
+    def get_dates(self):
+        if self.days == 0:
+            return []
+        # Query most recent dates
+        dates = self.session.query(sqlalchemy.sql.func.distinct(Rank.date)).\
+            order_by(Rank.date.desc()).\
+            limit(self.days)
+        dates = [date[0].strftime('%Y-%m-%d') for date in dates]
+        return dates
     
     def get_viewable(self):
         '''
@@ -53,11 +69,14 @@ class Stats(object):
             return self.day_count_by_country
         except AttributeError:
             pass
-        # Query ranks for all days per country
+        # Query ranks per country
         country_days = self.session.query(Rank.loc, sqlalchemy.sql.func.count(sqlalchemy.sql.func.distinct(Rank.date))).\
             filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
             filter_by(source='view').\
             group_by(Rank.loc)
+        # Add date filter
+        if self.days > 0:
+            country_days = country_days.filter(Rank.date.in_(self.get_dates()))
         self.day_count_by_country = {}
         for country_day in country_days:
             s = self.clean_loc(country_day[0])
@@ -77,7 +96,9 @@ class Stats(object):
             filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
             filter_by(source='view').\
             group_by(Rank.video_id, Rank.loc)
-        
+        # Filter by dates
+        if self.days > 0:
+            ranks = ranks.filter(Rank.date.in_(self.get_dates()))
         # Create dict with counts (location -> video id -> count)
         self.count_by_loc = {}
         for rank in ranks:
@@ -135,19 +156,26 @@ class Stats(object):
             filter_by(video_id=video_id).\
             filter_by(source='view').\
             group_by(Rank.loc)
+        # Filter by dates
+        if self.days > 0:
+            ranks = ranks.filter(Rank.date.in_(self.get_dates()))
         count_by_loc = {}
         for rank in ranks:
             count_by_loc[rank[0]] = rank[1]
         return count_by_loc
 
     def get_videos_without_metadata(self, count):
-        return self.session.query(Rank.video_id).\
+        videos = self.session.query(Rank.video_id).\
             filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
             filter_by(source='view').\
             outerjoin(Video).\
             group_by(Rank.video_id).\
             having(sqlalchemy.sql.func.count(Video.id)==0).\
             limit(count)
+        # Filter by dates
+        if self.days > 0:
+            videos = videos.filter(Rank.date.in_(self.get_dates()))
+        return 
 
     def get_spread(self, video_id):
         '''

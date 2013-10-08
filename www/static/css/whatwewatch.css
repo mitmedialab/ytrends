@@ -5,6 +5,12 @@ body {
 	color: rgb(92,72,58);
 }
 
+#yt-controls {
+	margin: 0 auto !important;
+	float: none;
+	padding-bottom: 5px;
+}
+
 #yt-map-container{
 	border: 1px solid #eee;
 	border-radius: 10px;

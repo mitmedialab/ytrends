@@ -1,17 +1,24 @@
 App.CountryRouter = Backbone.Router.extend({
 
     routes: {
-        "":                                  "home",
-        ":country1":                         "exploreCountry",
-        "v/:videoId":                        "video", 
-        ":country1/v/:videoId":              "exploreCountryWithVideo",
-        ":country1/:country2":               "exploreRelated",
-        ":country1/:country2/v/:videoId":    "exploreRelatedWithVideo"
+        "":                                              "home",
+        "all":                                           "home",
+        ":country1":                                     "exploreCountry",
+        "v/:videoId":                                    "video", 
+        ":country1/v/:videoId":                          "exploreCountryWithVideo",
+        ":country1/:country2":                           "exploreRelated",
+        ":country1/:country2/v/:videoId":                "exploreRelatedWithVideo",
+        "recent/:days":                                  "home",
+        ":country1/recent/:days":                        "exploreCountry",
+        "v/:videoId/recent/:days":                       "video", 
+        ":country1/v/:videoId/recent/:days":             "exploreCountryWithVideo",
+        ":country1/:country2/recent/:days":              "exploreRelated",
+        ":country1/:country2/v/:videoId/recent:days":    "exploreRelatedWithVideo"
     },
 
     home: function(){
         App.debug("Routed to root");
-        App.mapView.handleMapBackgroundClick();
+        App.mapView.renderAll();
     },
 
     video: function(videoId){
@@ -41,7 +48,7 @@ App.CountryRouter = Backbone.Router.extend({
         App.debug("Routed to "+country1Alpha3);
         var country1 = App.allCountries.findByAlpha3(country1Alpha3);
         if(country1){
-            App.mapView.handleValidCountryClick(country1,true);
+            App.mapView.renderSelected(country1);
         } else {
             //TODO
         }
@@ -52,9 +59,7 @@ App.CountryRouter = Backbone.Router.extend({
         var country1 = App.allCountries.findByAlpha3(country1Alpha3);
         var country2 = App.allCountries.findByAlpha3(country2Alpha3);
         if(country1 && country2){
-            App.mapView.handleValidCountryClick(country1,true);
-            _.delay(function(){App.mapView.handleValidCountryClick(country2,true);},
-                250);            
+            App.mapView.renderSelected(country1, country2);
         } else {
             //TODO
         }

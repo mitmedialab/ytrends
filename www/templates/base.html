@@ -31,7 +31,12 @@
         <h1>What We Watch <small>a geographic exploration of popular YouTube videos</small></h1>
     </div>
   </div>
-
+  
+  <div class="row" style="text-align:center">
+    <div id="yt-controls" class="col-md-4">
+    </div>
+  </div>
+  
   <div id="yt-map-container">
   </div>
 
@@ -108,6 +113,13 @@
 </script>
 <script type="text/template" id="yt-video-item-template">
   <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
+</script>
+<script type="text/template" id="yt-controls-template">
+  <div class="btn-group" data-toggle="buttons-radio">
+    <button type="radio" class="btn btn-default" name="timespan" value="0">All time</button>
+    <button type="radio" class="btn btn-default" name="timespan" value="7">Last 7 days</button>
+    <button type="radio" class="btn btn-default" name="timespan" value="30">Last 30 days</button>
+  </div>
 </script>
 
 <!-- all the JS includes -->

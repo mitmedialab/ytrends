@@ -16,8 +16,7 @@ App.MapView = Backbone.View.extend({
         _.bindAll(this, 
             'handleMapBackgroundClick',
             'handleInvalidCountryClick',
-            'handleValidCountryClick',
-            'unhighlightCountry'
+            'handleValidCountryClick'
         );
         this.render();
     },
@@ -77,7 +76,8 @@ App.MapView = Backbone.View.extend({
     
     handleMapBackgroundClick: function(evt){
         App.debug("Clicked background")
-        this.resetSelection();
+        App.countryRouter.navigate("all");
+        this.renderAll();
     },
 
     handleInvalidCountryClick: function(country){
@@ -99,42 +99,27 @@ App.MapView = Backbone.View.extend({
         });
         d3.event.stopPropagation();
     },
-
-    handleValidCountryClick: function(country, fromRouter){
+    
+    handleValidCountryClick: function(country) {
         App.debug('Clicked ' + country.id);
-        if(!('cid' in country)){    // gotta turn this into a country model object, since rederRelated uses the video info
-            country = App.allCountries.get(country.id);
-        }
+        country = App.allCountries.get(country.id);
         if (d3.event) d3.event.stopPropagation();
         var countryElem = $('#yt-country'+country.id);
 
-        // click on first country
-        if(!this.selected) {
+        if (!this.firstCountry) {
             App.debug("  first country click");
-            if(fromRouter!=true) App.countryRouter.navigate(country.get('code'));
-            this.selected = country;
-            // show info about country
-            new App.InfoBoxView({ country: this.selected});
-            // update map with related
-            //this._showCountryName(country.id);
-            this.renderRelated(country);        
-        //clicked on related country
-        } else if(country.id !== this.selected.id) {
+            App.countryRouter.navigate(country.get('code'));
+            this.renderSelected(country);
+        } else if (this.firstCountry.id !== country.id) {
             App.debug("  second country click");
-            if(fromRouter!=true) App.countryRouter.navigate(this.selected.get('code')+"/"+country.get("code"));
-            this.updateRelated(country);
-            //this._showCountryName(country.id);
-            //var videos = this.selected.getVideosInCommonWith(country.id);
-            var videos = this.selected.getIdfVideosInCommonWith(country.id);
-            new App.ConnectionInfoView({ 
-                country1: this.selected,
-                country2: App.allCountries.get(country.id),
-                percent: this.selected.getPercentInCommonWith(country.id),
-                videoIds: videos
-            });
+            App.countryRouter.navigate([
+                this.firstCountry.get('code')
+                , country.get('code')
+            ].join('/'));
+            this.renderSelected(this.firstCountry, country);
         } else {
-            App.debug("  other click");
-            this.resetSelection();
+            App.countryRouter.navigate("");
+            this.renderAll();
         }
     },
     
@@ -145,16 +130,6 @@ App.MapView = Backbone.View.extend({
         var t0 = label.transition().attr('opacity', 1);
         var t1 = t0.transition().attr('opacity', 0).delay(1000);
         var t2 = t1.transition().attr('visibility','hiddnen')
-    },
-
-    resetSelection: function(){
-        App.debug("  reset selection");
-        this.selected = null;
-        this.renderAll();
-        this.svg.selectAll('.yt-country-name').transition().attr('opacity', '0').each("end", function(){$(this).attr('visibility','hidden')});
-        $('#yt-connection-info').hide();
-        App.InfoBoxView.Welcome();
-        App.countryRouter.navigate("");
     },
 
     renderBackground: function (world) {
@@ -206,20 +181,28 @@ App.MapView = Backbone.View.extend({
             .attr("font-size", "16px")
             .attr("font-weight", "bold")
             .attr("fill","rgb(92,72,58)");
+        // Render sub-views
+        App.InfoBoxView.Welcome();
+        // Update views state
+        delete this.firstCountry;
+        delete this.secondCountry;
     },
-
-    renderRelated: function (country) {
+    
+    renderSelected: function (country, secondCountry) {
         var that = this;
-        // handle the case where we have data for the country
-        var countryElem = $('#yt-country'+country.id);
-        if(country==null){
-            App.debug("No info about "+country.id);
+        if (!country) {
+            App.debug("renderSelected() called with null first country");
             return;
         }
-        $('.yt-country').attr("class","yt-country");
+        // Ensure we have the most recend data
+        country = App.allCountries.get(country.id);
+        if (secondCountry) {
+            secondCountry = App.allCountries.get(secondCountry.id);
+        }
+        
+        // Style countries based on relation to first country
         var friends = country.getTopFriendCountries();
-        // Create color array to use as d3 data
-        // This lets us add the selected country as a special case
+        // Normalize the color scale
         if (App.globals.normalizeToGlobal) {
             var countryMax = d3.max(friends, function (d) { return d.weight; });
             App.debug('Normalizing to range (0, ' + this.maxWeight + ')');
@@ -229,12 +212,11 @@ App.MapView = Backbone.View.extend({
             App.debug('Normalizing to range (0, ' + countryMax + ')');
             this.color.domain([0, countryMax]);
         }
-        var colors = [{id:country.id, color:this.selectedColor}];
-        $.each(friends, function (i, d) {
-            colors.push({id:d.id, color:that.color(d.weight)});
-        });
+        // Create array of the current country and its friends
+        var countryData = friends;
+        countryData.push(country);
         var countries = this.svg.select('#yt-data').selectAll('.yt-country')
-            .data(colors, function (d) { return d.id; });
+            .data(countryData, function (d) { return d.id; });
         countries.enter()
             .append("path")
             .attr("class", "yt-country")
@@ -243,33 +225,45 @@ App.MapView = Backbone.View.extend({
             .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
         countries.exit()
             .remove();
-        countries
-            .transition()
-            .attr("fill", function (d) { return d.color; });
-            
-        // TODO: animate arcs kind of like http://bl.ocks.org/enoex/6201948
-    },
+        transition = countries.transition()
+        transition
+            .attr("fill", function (d) {
+                return d.id == country.id ? that.selectedColor : that.color(d.weight);
+            });
 
-    updateRelated: function (country) {
-        this.svg.select('#yt-data').selectAll('.yt-country')
-            .transition()
-            .attr('stroke', '#fff')
-            .attr('stroke-width', '1');
-        this.svg.select('#yt-country' + country.id)
-            .transition()
-            .attr('stroke', this.selectedColor)
-            .attr('stroke-width', '2');
-        // Raise z-index by moving to end, allows whole border to be seen
-        var node = $('#yt-country' + country.id);
-        node.remove();
-        $('#yt-data').append(node);
-    },
-    
-    unhighlightCountry: function(country){
-        this.svg.select('#yt-country' + country.id)
-            .transition()
-            .attr('stroke', '#fff')
-            .attr('stroke-width', '1');
+        if (secondCountry) {
+            // Style borders to indicated second country
+            transition
+                .attr('stroke', function (d) {
+                    return d.id == secondCountry.id ? that.selectedColor : '#fff'
+                })
+                .attr('stroke-width', function (d) {
+                    return d.id == secondCountry.id ? '2' : '1'
+                });
+            // Raise z-index by moving to end, allows whole border to be seen
+            var node = $('#yt-country' + secondCountry.id);
+            node.remove();
+            $('#yt-data').append(node);
+        } else {
+            // Reset border styles
+            transition.attr('stroke', '#fff').attr('stroke-width', '1');
+        }
+        
+        // Render sub-views
+        if (!secondCountry) {
+            this.countryInfo = new App.InfoBoxView({ country: country});
+        } else {
+            var videos = country.getIdfVideosInCommonWith(secondCountry.id);
+            this.connectionInfo = new App.ConnectionInfoView({ 
+                country1: country,
+                country2: secondCountry,
+                percent: country.getPercentInCommonWith(country.id),
+                videoIds: videos
+            });
+        }
+        // Update state
+        this.firstCountry = country;
+        this.secondCountry = secondCountry;
     },
 
     renderConnections: function (country) {
@@ -334,8 +328,8 @@ App.ConnectionInfoView = Backbone.View.extend({
         this.$el.show();
     },
     handleClose: function(){
-        App.mapView.unhighlightCountry(this.options.country2);
         this.$el.hide();
+        App.mapView.renderSelected(this.options.country1);
         App.countryRouter.navigate(this.options.country1.get('code'));
     }
 });
@@ -393,7 +387,7 @@ App.FullVideoView = Backbone.View.extend({
         this.options.popularity = data;
         this.render();
         this.$el.on('hidden.bs.modal', this.onClosing);
-        this.$el.modal();        
+        this.$el.modal();
     },
     onClosing: function(){
         var route = Backbone.history.fragment;
@@ -579,3 +573,49 @@ App.InfoBoxView.Welcome = function(){
         content: '<p>Click on a country to see which other countries watched similar videos.  The darker the country, the more they have in common.  Click a second country to see what videos are popular in both places.</p><p>Read about <a href="http://www.ethanzuckerman.com/blog/2013/09/23/what-we-watch-a-new-tool-for-watching-how-popular-videos-spread-online/">our first insights</a> to learn more. Created by the <a href="http://civic.mit.edu/">MIT Center for Civic Media</a>, based on data available on the public <a href="http://www.youtube.com/trendsdashboard">YouTube Trends website</a>.</p><p><small>Curious? Email whatwewatch&#64;media.mit.edu</small></p>'
     });
 };
+
+App.ControlView = Backbone.View.extend({
+    el: $('#yt-controls'),
+    initialize: function () {
+        this.render();
+        _.bindAll(this, 'handlePeriodSelect')
+        $('#yt-controls button:first').addClass('active');
+    },
+    events: {
+        'click .btn': 'handlePeriodSelect'
+    },
+    render: function () {
+        var template = _.template($('#yt-controls-template').html());
+        this.$el.html( template );
+    },
+    handlePeriodSelect: function (ev) {
+        App.debug('Selected period');
+        // Deselect others
+        $(ev.currentTarget).siblings().removeClass('active');
+        if ($(ev.currentTarget).hasClass('active')) {
+            // Prevent deselection if we click the same button twice
+            $(ev.currentTarget).removeClass('active');
+        }
+        var recentDays = $(ev.currentTarget).val();
+        App.debug("Selected time span: " + recentDays);
+        // Set the data to the selected timespan
+        // If the project gets bigger, this should throw an event and instead
+        // let a controller handle it.
+        state = App.getState();
+        if (recentDays != state.recentDays) {
+            if (recentDays == 30) {
+                App.allCountries = App.allCountries30;
+            } else if (recentDays == 7) {
+                App.allCountries = App.allCountries7;
+            } else {
+                App.allCountries = App.allCountries0;
+            }
+            state['recentDays'] = recentDays;
+            App.countryRouter.navigate(App.getRoute(state));
+        }
+    },
+    renderRecent: function (recent) {
+        $('button', this.$el).removeClass('active');
+        $('button[value='+recent+']', this.$el).addClass('active');
+    }
+});

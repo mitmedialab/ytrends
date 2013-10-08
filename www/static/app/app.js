@@ -5,7 +5,7 @@ window.App = {
     globals: {
         lastAlertTimeout: null,
         normalizeToGlobal: true,
-        writeLog: false,
+        writeLog: true,
         worldMap: null,
         countryIdToPath: {},
         colors: {
@@ -27,13 +27,22 @@ window.App = {
     initialize: function(){
         App.debug("Initializing App")
         ISO3166.initialize();
-        App.allCountries = new App.CountriesCollection();
+        App.allCountries0 = new App.CountriesCollection();
+        App.allCountries7 = new App.CountriesCollection();
+        App.allCountries30 = new App.CountriesCollection();
+        App.allCountries = App.allCountries0;
         // kick off all async loading
-        var runApp = _.after(2,App.run);
-        App.allCountries.fetch({
-            //url: "data/weights-count.json",
-            //url: "data/weights-jaccard.json",
+        var runApp = _.after(4,App.run);
+        App.allCountries0.fetch({
             url: "static/data/weights-bhattacharyya.json",
+            success: runApp
+        });
+        App.allCountries7.fetch({
+            url: "static/data/weights-bhattacharyya-7.json",
+            success: runApp
+        });
+        App.allCountries30.fetch({
+            url: "static/data/weights-bhattacharyya-30.json",
             success: runApp
         });
         d3.json('static/data/world-110m.json', function(data){
@@ -55,7 +64,55 @@ window.App = {
         App.countryRouter = new App.CountryRouter();
         App.mapView = new App.MapView();
         App.InfoBoxView.Welcome();
+        App.controlView = new App.ControlView();
         Backbone.history.start();
+    },
+    
+    // Return the state of the app by parsing the url
+    getState: function () {
+        var route = Backbone.history.fragment;
+        var next;
+        var state = {countries:[]};
+        parts = route.split('/').reverse();
+        while (parts.length > 0) {
+            next = parts.pop();
+            if (next === 'all') {
+                // Do nothing if we're on the homepage
+            } else if (next === 'v') {
+                // Check for video
+                if (parts.length > 0) {
+                    state['videoId'] = parts.pop();
+                }
+            } else if (next === 'r') {
+                // Check for timespan
+                if (parts.length > 0) {
+                    state['recentDays'] = parts.pop();
+                }
+            } else {
+                // Otherwise add countries
+                state.countries.push(next);
+            }
+        }
+        return state;
+    },
+    
+    // Get route fragment from state object
+    getRoute: function (state) {
+        var parts = [];
+        if (state.countries.length == 0) {
+            parts.push('all');
+        } else {
+            $.each(state.countries, function (i, d) {
+                parts.push(d);
+            });
+        }
+        if (state.videoId) {
+            parts.push('v/' + videoId);
+        }
+        if (state.recentDays) {
+            parts.push('r/' + state.recentDays);
+        }
+        return parts.join('/');
     }
 
 };
