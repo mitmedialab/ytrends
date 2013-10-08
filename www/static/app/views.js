@@ -76,7 +76,9 @@ App.MapView = Backbone.View.extend({
     
     handleMapBackgroundClick: function(evt){
         App.debug("Clicked background")
-        App.countryRouter.navigate("all");
+        state = App.getState();
+        state.countries = [];
+        App.countryRouter.navigate(App.getRoute(state));
         this.renderAll();
     },
 
@@ -108,17 +110,23 @@ App.MapView = Backbone.View.extend({
 
         if (!this.firstCountry) {
             App.debug("  first country click");
-            App.countryRouter.navigate(country.get('code'));
+            var state = App.getState();
+            state.countries = [country.get('code')];
+            App.countryRouter.navigate(App.getRoute(state));
             this.renderSelected(country);
         } else if (this.firstCountry.id !== country.id) {
             App.debug("  second country click");
-            App.countryRouter.navigate([
+            var state = App.getState();
+            state.countries = [
                 this.firstCountry.get('code')
                 , country.get('code')
-            ].join('/'));
+            ];
+            App.countryRouter.navigate(App.getRoute(state));
             this.renderSelected(this.firstCountry, country);
         } else {
-            App.countryRouter.navigate("");
+            var state = App.getState();
+            state.countries = [];
+            App.countryRouter.navigate(App.getRoute(state));
             this.renderAll();
         }
     },
@@ -182,19 +190,42 @@ App.MapView = Backbone.View.extend({
             .attr("font-weight", "bold")
             .attr("fill","rgb(92,72,58)");
         // Render sub-views
+        if (this.connectionInfo) {
+            this.connectionInfo.hide();
+            delete this.connectionInfo;
+        }
         App.InfoBoxView.Welcome();
         // Update views state
         delete this.firstCountry;
         delete this.secondCountry;
     },
     
-    renderSelected: function (country, secondCountry) {
+    // Render selected countries
+    // country - model of first country
+    // secondCountry - model of second country or undefined for none
+    // recentDays - Data set to use, uses current if undefined
+    renderSelected: function (country, secondCountry, recentDays) {
+        App.debug("Rendering selected countries");
         var that = this;
         if (!country) {
             App.debug("renderSelected() called with null first country");
             return;
         }
-        // Ensure we have the most recend data
+        // Change datasets if necessary
+        // This would be better in a Controller class
+        if (typeof(recentDays) !== "undefined") {
+            if (recentDays != this.recentDays) {
+                if (recentDays == 30) {
+                    App.allCountries = App.allCountries30;
+                } else if (recentDays == 7) {
+                    App.allCountries = App.allCountries7;
+                } else {
+                    App.allCountries = App.allCountries0;
+                }
+                this.recentDays = recentDays;
+            }
+        }
+        // Ensure we have data from the current dataset
         country = App.allCountries.get(country.id);
         if (secondCountry) {
             secondCountry = App.allCountries.get(secondCountry.id);
@@ -223,6 +254,8 @@ App.MapView = Backbone.View.extend({
             .attr("id", function(d,i) {return "yt-country"+d.id})
             .attr("data-id", function(d,i) {return d.id})
             .attr("d", function (d) { return that.path(App.globals.countryIdToPath[d.id]); })
+            .attr("stroke", "#fff")
+            .attr("fill", App.globals.colors.disabledColor);
         countries.exit()
             .remove();
         transition = countries.transition()
@@ -327,10 +360,15 @@ App.ConnectionInfoView = Backbone.View.extend({
         }
         this.$el.show();
     },
-    handleClose: function(){
+    hide: function() {
         this.$el.hide();
+    },
+    handleClose: function(){
+        this.hide();
         App.mapView.renderSelected(this.options.country1);
-        App.countryRouter.navigate(this.options.country1.get('code'));
+        var state = App.getState();
+        state.countries = [this.options.country1.get('code')]
+        App.countryRouter.navigate(App.getRoute(state));
     }
 });
 
@@ -603,15 +641,16 @@ App.ControlView = Backbone.View.extend({
         // let a controller handle it.
         state = App.getState();
         if (recentDays != state.recentDays) {
-            if (recentDays == 30) {
-                App.allCountries = App.allCountries30;
-            } else if (recentDays == 7) {
-                App.allCountries = App.allCountries7;
-            } else {
-                App.allCountries = App.allCountries0;
-            }
             state['recentDays'] = recentDays;
             App.countryRouter.navigate(App.getRoute(state));
+            if (state.countries.length === 1) {
+                var firstCountry = App.allCountries.get(ISO3166.getIdFromAlpha3(state.countries[0]))
+                App.mapView.renderSelected(firstCountry, null, recentDays);
+            } else if (state.countries.length > 1) {
+                var firstCountry = App.allCountries.get(ISO3166.getIdFromAlpha3(state.countries[0]))
+                var secondCountry = App.allCountries.get(ISO3166.getIdFromAlpha3(state.countries[1]))
+                App.mapView.renderSelected(firstCountry, secondCountry, recentDays);
+            }
         }
     },
     renderRecent: function (recent) {
