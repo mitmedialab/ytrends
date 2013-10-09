@@ -33,7 +33,7 @@ App.MapView = Backbone.View.extend({
     initMap: function () {
         App.debug("  init map")
         var mapWidth = parseInt(d3.select(this.el).style('width'));
-        var mapHeight = mapWidth / 2.19 // 520 @ 1140
+        var mapHeight = mapWidth / 2.19; // 520 @ 1140
         var mapScale = mapWidth / 5.18; // 220 @ 1140
         var mapOffset = [mapWidth/1.96, mapHeight / 1.73]; // 580, 300 @ 1140
         this.projection = d3.geo.kavrayskiy7()
