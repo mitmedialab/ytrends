@@ -283,9 +283,10 @@ App.MapView = Backbone.View.extend({
         }
         
         // Render sub-views
-        if (!secondCountry) {
+        if (country) {
             this.countryInfo = new App.InfoBoxView({ country: country});
-        } else {
+        }
+        if (secondCountry) {
             var videos = country.getIdfVideosInCommonWith(secondCountry.id);
             this.connectionInfo = new App.ConnectionInfoView({ 
                 country1: country,
@@ -391,19 +392,15 @@ App.VideoItemView = Backbone.View.extend({
     },
     showVideo: function(evt){
         var videoId = $(evt.target).attr('data-video-id');
-        if(this.options.country1==null && this.options.country2==null){
-            App.countryRouter.navigate(this.options.videoId);
-        } else if (this.options.country2==null){
-            App.countryRouter.navigate(this.options.country1.get('code')+"/v/"+this.options.videoId);
-        } else {
-            App.countryRouter.navigate(this.options.country1.get('code')+"/"+this.options.country2.get('code')+"/v/"+this.options.videoId);
-        }
+        state = App.getState();
+        state['videoId'] = this.options.videoId;
+        App.countryRouter.navigate(App.getRoute(state));
         
         new App.FullVideoView({ 
             country1: this.options.country1,
             country2: this.options.country2,
             dayPct: this.options.dayPct,
-            'videoId': videoId
+            'videoId': this.options.videoId
         });
     }
 });
@@ -428,13 +425,9 @@ App.FullVideoView = Backbone.View.extend({
         this.$el.modal();
     },
     onClosing: function(){
-        var route = Backbone.history.fragment;
-        if(route.indexOf('v/')==0){
-            route = '';
-        } else {
-            route = route.substr(0,route.indexOf('v/')-1);
-        }
-        App.countryRouter.navigate(route);
+        state = App.getState();
+        delete state.videoId;
+        App.countryRouter.navigate(App.getRoute(state));
     },
     render: function(){
         App.debug("rendering FullVideoView "+this.options.videoId);
@@ -626,6 +619,15 @@ App.ControlView = Backbone.View.extend({
         var template = _.template($('#yt-controls-template').html());
         this.$el.html( template );
     },
+    update: function () {
+        state = App.getState();
+        var recentDays = 0;
+        if (state.recentDays) {
+            recentDays = state.recentDays;
+        }
+        $('button', this.$el).removeClass('active');
+        $('button[value='+recentDays+']', this.$el).addClass('active');
+    },
     handlePeriodSelect: function (ev) {
         App.debug('Selected period');
         // Deselect others
@@ -643,7 +645,15 @@ App.ControlView = Backbone.View.extend({
         if (recentDays != state.recentDays) {
             state['recentDays'] = recentDays;
             App.countryRouter.navigate(App.getRoute(state));
-            if (state.countries.length === 1) {
+            if (state.countries.length === 0) {
+                if (recentDays == 7) {
+                    App.allCountries = App.allCountries7;
+                } else if (recentDays == 30) {
+                    App.allCountries = App.allCountries30;
+                } else {
+                    App.allCountries = App.allCountries0;
+                }
+            } else if (state.countries.length === 1) {
                 var firstCountry = App.allCountries.get(ISO3166.getIdFromAlpha3(state.countries[0]))
                 App.mapView.renderSelected(firstCountry, null, recentDays);
             } else if (state.countries.length > 1) {

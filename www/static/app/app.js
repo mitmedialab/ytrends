@@ -76,6 +76,9 @@ window.App = {
         parts = route.split('/').reverse();
         while (parts.length > 0) {
             next = parts.pop();
+            if (next.length === 0) {
+                continue;
+            }
             if (next === 'all') {
                 // Do nothing if we're on the homepage
             } else if (next === 'v') {
@@ -107,12 +110,29 @@ window.App = {
             });
         }
         if (state.videoId) {
-            parts.push('v/' + videoId);
+            parts.push('v/' + state.videoId);
         }
         if (state.recentDays) {
             parts.push('r/' + state.recentDays);
         }
         return parts.join('/');
+    },
+    
+    // Select the appropriate data source
+    selectData: function () {
+        var recentDays = 0;
+        var state = App.getState();
+        if (state.recentDays) {
+            recentDays = state.recentDays;
+        }
+        if (recentDays == 7) {
+            App.allCountries = App.allCountries7;
+        } else if (recentDays == 30) {
+            App.allCountries = App.allCountries30;
+        } else {
+            App.allCountries = App.allCountries0;
+        }
+        App.controlView.update();
     }
 
 };
