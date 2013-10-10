@@ -68,8 +68,9 @@ def video_popularity(video_id):
         data.append( {'code': country_code, 'score': float(day_count)/float(max_days)} )
     return jsonify(
         videoId=video_id,
-        mostPopular={'code':max_country, 'days':max_days},
-        data=data
+        mostPopularCountry={'code':max_country, 'days':max_days},
+        countryScores=data,
+        attentionByDate= stats.get_video_attention_by_day(video_id)
     )
 
 if __name__ == "__main__":

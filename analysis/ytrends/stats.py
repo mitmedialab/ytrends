@@ -164,6 +164,20 @@ class Stats(object):
             count_by_loc[rank[0]] = rank[1]
         return count_by_loc
 
+    def get_video_attention_by_day(self, video_id):
+        ranks = self.session.query(Rank.date, sqlalchemy.sql.func.count('*').label('entries')).\
+            filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+            filter_by(video_id=video_id).\
+            filter_by(source='view').\
+            group_by(Rank.date)
+        # Filter by dates
+        if self.days > 0:
+            ranks = ranks.filter(Rank.date.in_(self.get_dates()))
+        count_by_date = {}
+        for rank in ranks:
+            count_by_date[rank[0]] = rank[1]
+        return count_by_date
+
     def get_videos_without_metadata(self, count):
         videos = self.session.query(Rank.video_id).\
             filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\

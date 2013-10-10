@@ -24,5 +24,9 @@ try:
     assert len(set(stats.get_locs()) ^ set(mock.get_locs()))==0
     print("Passed")
 
+    print("Checking get_video_attention_by_day")
+    print len(stats.get_video_attention_by_day('CXK83f0vvmE'))==2
+    print("Passed")
+
 except AssertionError:
     print("Assertion failed")

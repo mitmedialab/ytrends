@@ -446,8 +446,8 @@ App.FullVideoView = Backbone.View.extend({
         var content = this.template({
             title: t,
             summary: s,
-            mostPopularCountry: ISO3166.getNameFromAlpha3(this.options.popularity.mostPopular.code),
-            mostPopularDays: this.options.popularity.mostPopular.days,
+            mostPopularCountry: ISO3166.getNameFromAlpha3(this.options.popularity.mostPopularCountry.code),
+            mostPopularDays: this.options.popularity.mostPopularCountry.days,
             videoId: this.options.videoId
         });
         this.$el.html( content );
@@ -477,7 +477,7 @@ App.FullVideoView = Backbone.View.extend({
             .attr("data-id",function(d){ return d.id })
             .attr("d", this.path);
         var colors = [];
-        $.each(this.options.popularity.data, function (i, d) {
+        $.each(this.options.popularity.countryScores, function (i, d) {
             colors.push({id:ISO3166.getIdFromAlpha3(d.code), color:that.color(d.score)});
         });
         var countries = this.svg.select('#yt-data').selectAll('.yt-country')
