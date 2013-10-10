@@ -73,6 +73,12 @@ h4 {
 	position: relative;
 }
 
+#yt-controls {
+	position: absolute;
+	top: 65px;
+	right: 30px;
+	width: 280px;
+}
 #yt-info-box {
 	position: absolute;
 	top: 320px;
