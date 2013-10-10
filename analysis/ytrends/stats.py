@@ -1,9 +1,7 @@
 from __future__ import division
-
 import math
-
 import sqlalchemy
-
+from datetime import date, timedelta
 from ytrends.db import *
 
 class Stats(object):
@@ -174,8 +172,16 @@ class Stats(object):
         if self.days > 0:
             ranks = ranks.filter(Rank.date.in_(self.get_dates()))
         count_by_date = {}
+        dates = []
         for rank in ranks:
-            count_by_date[rank[0]] = rank[1]
+            count_by_date[str(rank[0])] = rank[1]
+            dates.append(rank[0])
+        delta = max(dates) - min(dates)
+        # fill in the days that are zeros (easier to do in code than as a left+nested query with sqlalchemy)
+        for day_delta in range(delta.days + 1):
+            date = min(dates)+timedelta(days=day_delta)
+            if date not in dates:
+                count_by_date[str(date)] = 0
         return count_by_date
 
     def get_videos_without_metadata(self, count):
