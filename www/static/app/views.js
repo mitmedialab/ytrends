@@ -422,7 +422,6 @@ App.VideoAttentionView = Backbone.View.extend({
             data.push({'date':parseDate(this.options.data[index].date),
                        'count':this.options.data[index].count});
         }
-        console.log(data);
         var margin = {top: 0, right: 20, bottom: 60, left: 20},
             width = 560 - margin.left - margin.right,
             height = 120 - margin.top - margin.bottom;

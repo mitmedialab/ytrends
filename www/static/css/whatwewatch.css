@@ -74,10 +74,7 @@ h4 {
 }
 
 #yt-controls {
-	position: absolute;
-	top: 65px;
-	right: 30px;
-	width: 280px;
+	display: inline-block;
 }
 #yt-info-box {
 	position: absolute;
