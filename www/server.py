@@ -1,6 +1,7 @@
 import sys, os, logging, ConfigParser, operator
 from flask import Flask, render_template, json, jsonify
 import sqlalchemy, sqlalchemy.orm
+from operator import itemgetter
 
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,os.path.join(parentdir,'analysis') )
@@ -66,11 +67,15 @@ def video_popularity(video_id):
     data = []
     for country_code,day_count in popularity.iteritems():
         data.append( {'code': country_code, 'score': float(day_count)/float(max_days)} )
+    attention_data = []
+    for date, count in stats.get_video_attention_by_day(video_id).iteritems():
+        attention_data.append( {'date': date, 'count': count})
+    attention_data = sorted(attention_data, key=itemgetter('date')) 
     return jsonify(
         videoId=video_id,
         mostPopularCountry={'code':max_country, 'days':max_days},
         countryScores=data,
-        attentionByDate= stats.get_video_attention_by_day(video_id)
+        attentionByDate=attention_data
     )
 
 if __name__ == "__main__":

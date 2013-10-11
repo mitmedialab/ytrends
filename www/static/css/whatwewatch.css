@@ -138,3 +138,20 @@ and (orientation : landscape) {
 	}
 
 }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #999;
+}
+.x.axis text {
+  fill: #999;
+}
+.x.axis path {
+  stroke: none;
+}
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}

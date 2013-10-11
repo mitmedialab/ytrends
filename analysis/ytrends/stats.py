@@ -163,23 +163,25 @@ class Stats(object):
         return count_by_loc
 
     def get_video_attention_by_day(self, video_id):
+        results = self.session.query(sqlalchemy.sql.func.distinct(Rank.date)).\
+            order_by(Rank.date.desc())
+        all_dates = []
+        for row in results:
+            all_dates.append(row[0])
         ranks = self.session.query(Rank.date, sqlalchemy.sql.func.count('*').label('entries')).\
             filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
             filter_by(video_id=video_id).\
             filter_by(source='view').\
             group_by(Rank.date)
-        # Filter by dates
-        if self.days > 0:
-            ranks = ranks.filter(Rank.date.in_(self.get_dates()))
         count_by_date = {}
         dates = []
         for rank in ranks:
             count_by_date[str(rank[0])] = rank[1]
             dates.append(rank[0])
-        delta = max(dates) - min(dates)
+        delta = max(all_dates) - min(all_dates)
         # fill in the days that are zeros (easier to do in code than as a left+nested query with sqlalchemy)
         for day_delta in range(delta.days + 1):
-            date = min(dates)+timedelta(days=day_delta)
+            date = min(all_dates)+timedelta(days=day_delta)
             if date not in dates:
                 count_by_date[str(date)] = 0
         return count_by_date

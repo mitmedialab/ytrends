@@ -405,6 +405,67 @@ App.VideoItemView = Backbone.View.extend({
     }
 });
 
+App.VideoAttentionView = Backbone.View.extend({
+    tagName: 'div',
+    className: 'yt-date-histogram',
+    template: _.template($('#yt-video-attention-template').html()),
+    initialize: function(){
+        App.debug('Setting up histogram');
+        this.render();
+    },
+    render: function(){
+        var content = this.template();
+        this.$el.html( content );
+        // set up the data
+        var data = [];
+        for(index in this.options.data){
+            data.push({'date':parseDate(this.options.data[index].date),
+                       'count':this.options.data[index].count});
+        }
+        console.log(data);
+        var margin = {top: 0, right: 20, bottom: 60, left: 20},
+            width = 560 - margin.left - margin.right,
+            height = 120 - margin.top - margin.bottom;
+        var x = d3.time.scale()
+            .range([0, width])
+        var y = d3.scale.linear()
+            .range([height, 0]);
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom")
+            .tickFormat(d3.time.format("%m/%d"));
+        var line = d3.svg.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.count); });
+        var svg = d3.select(this.el).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain(d3.extent(data, function(d) { return d.count; }));
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+        .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) { return "rotate(-65)" });
+        svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
+    }
+});
+
+//http://stackoverflow.com/questions/2587345/javascript-date-parse
+function parseDate(input) {
+  var parts = input.split('-');
+  return new Date(parts[0], parts[1]-1, parts[2]); // months are 0-based
+}
+
 App.FullVideoView = Backbone.View.extend({
     tagName: 'div',
     className: 'modal',
@@ -451,6 +512,9 @@ App.FullVideoView = Backbone.View.extend({
             videoId: this.options.videoId
         });
         this.$el.html( content );
+        // render and add the attention-over-time plot
+        var attentionView = new App.VideoAttentionView({data: this.options.popularity.attentionByDate});
+        this.$('.yt-video-attention').html(attentionView.el);
         // render the map of global popularity
         this.projection = d3.geo.kavrayskiy7()
             .scale(125)

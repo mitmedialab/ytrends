@@ -78,11 +78,15 @@
       <div class="modal-body">
         <p><%=summary%></p>
         <iframe width="560" height="315" src="http://www.youtube.com/embed/<%=videoId%>?rel=0" frameborder="0" allowfullscreen></iframe>
-        <h4>Global Popularity</h4>
+        <div class="yt-video-attention"></div>
+        <h4>Where was this trending?</h4>
         <!--<p>This was most popular in <%=mostPopularCountry%>, where it was on the top trending list for <%=mostPopularDays%> days.</p>-->
       </div>
     </div>
   </div>
+</script>
+<script type="text/template" id="yt-video-attention-template">
+  <h4>When was this trending?</h4>
 </script>
 <script type="text/template" id="yt-alert-template">
   <%=msg%>
