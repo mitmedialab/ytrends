@@ -28,18 +28,17 @@
   <div class="row">
     <div class="col-md-12">
         <a href="http://civic.mit.edu/" class="pull-right"><img src="/static/img/c4cm-badge.gif" alt="MIT Center for Civic Media"/></a>
-        <h1>What We Watch <small>exploring <div id="yt-controls"></div> popular YouTube videos</small></h1>
+        <h1>What We Watch <small>explore trending YouTube videos</small></h1>
     </div>
   </div>
     
-  <div id="yt-map-container">
-  </div>
+  <div id="yt-controls"></div>
 
-  <div id="yt-connection-info" class="panel panel-default" style="display:none">
-  </div>
+  <div id="yt-map-container"></div>
 
-  <div id="yt-info-box" class="panel panel-default" style="display:none">
-  </div>
+  <div id="yt-connection-info" class="panel panel-default" style="display:none"></div>
+
+  <div id="yt-info-box" class="panel panel-default" style="display:none"></div>
 
   <div id="yt-progress-bar" class="panel panel-default">
     <div class="panel-body">
@@ -114,11 +113,15 @@
   <img width="120" height="90" src="http://img.youtube.com/vi/<%=videoId%>/default.jpg" data-video-id="<%=videoId%>"/>
 </script>
 <script type="text/template" id="yt-controls-template">
-  <div class="btn-group" data-toggle="buttons-radio">
-    <button type="radio" class="btn btn-default" name="timespan" value="0">All time</button>
-    <button type="radio" class="btn btn-default" name="timespan" value="7">Last 7 days</button>
-    <button type="radio" class="btn btn-default" name="timespan" value="30">Last 30 days</button>
-  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="btn-group" data-toggle="buttons-radio">
+        <button type="radio" class="btn btn-default" name="timespan" value="0">All time</button>
+        <button type="radio" class="btn btn-default" name="timespan" value="7">Last 7 days</button>
+        <button type="radio" class="btn btn-default" name="timespan" value="30">Last 30 days</button>
+      </div>
+    </div>
+  <div>
 </script>
 
 <!-- all the JS includes -->
