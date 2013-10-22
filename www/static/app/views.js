@@ -291,7 +291,7 @@ App.MapView = Backbone.View.extend({
             this.connectionInfo = new App.ConnectionInfoView({ 
                 country1: country,
                 country2: secondCountry,
-                percent: country.getPercentInCommonWith(country.id),
+                percent: country.getPercentInCommonWith(secondCountry.id),
                 videoIds: videos
             });
         }
@@ -399,6 +399,7 @@ App.VideoItemView = Backbone.View.extend({
         new App.FullVideoView({ 
             country1: this.options.country1,
             country2: this.options.country2,
+            recentDays: state.recentDays,
             dayPct: this.options.dayPct,
             'videoId': this.options.videoId
         });
@@ -417,22 +418,32 @@ App.VideoAttentionView = Backbone.View.extend({
         var content = this.template();
         this.$el.html( content );
         // set up the data
-        var data = [];
-        for(index in this.options.data){
-            data.push({'date':parseDate(this.options.data[index].date),
-                       'count':this.options.data[index].count});
-        }
-        var margin = {top: 0, right: 20, bottom: 60, left: 20},
+        var attention = this.options.video.get('attention');
+        var extent = d3.extent(attention, function(d) { return d.date; });
+        dateCount = Math.round((extent[1] - extent[0])/24/60/60 + 1);
+        var attentionCountries = _.map(_.pluck(attention, 'countries'), function (d) { return _.pluck(d, 'loc'); });
+        var countries = d3.set(d3.merge(attentionCountries)).values();
+        var margin = {top: 0, right: 20, bottom: 60, left: 50},
             width = 560 - margin.left - margin.right,
-            height = 120 - margin.top - margin.bottom;
+            height = countries.length*16;
         var x = d3.time.scale()
-            .range([0, width])
-        var y = d3.scale.linear()
-            .range([height, 0]);
+            .rangeRound([0, width])
+        var y = d3.scale.ordinal()
+            .rangeRoundBands([height, 0], 0.25);
+        var color = d3.scale.linear()
+            .domain([10, 1])
+            .range([App.globals.colors.minColor, App.globals.colors.maxColor])
+        var firstDate = extent[0];
+        var dateWidth = Math.round(width / dateCount);
+        x.domain([new Date(extent[0]*1000), new Date((extent[1]+24*60*60)*1000)]);
+        y.domain(countries);
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom")
             .tickFormat(d3.time.format("%m/%d"));
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
         var line = d3.svg.line()
             .x(function(d) { return x(d.date); })
             .y(function(d) { return y(d.count); });
@@ -441,8 +452,6 @@ App.VideoAttentionView = Backbone.View.extend({
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        x.domain(d3.extent(data, function(d) { return d.date; }));
-        y.domain(d3.extent(data, function(d) { return d.count; }));
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
@@ -452,10 +461,34 @@ App.VideoAttentionView = Backbone.View.extend({
             .attr("dx", "-.8em")
             .attr("dy", ".15em")
             .attr("transform", function(d) { return "rotate(-65)" });
-        svg.append("path")
-            .datum(data)
-            .attr("class", "line")
-            .attr("d", line);
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .selectAll('.y.axis path')
+            .remove();
+        svg.selectAll('.y.axis line')
+            .attr('x2', width + margin.left)
+            .attr('stroke', '#ddd')
+            .style('stroke', '#ddd');
+        svg.selectAll('.date')
+            .data(attention, function (d) { return d.date; })
+            .enter()
+                .append('g')
+                .attr('class', function (d) { return 'date'; })
+                .attr('transform', function (d) {
+                    return 'translate(' + Math.floor((d.date - firstDate)/24/60/60*(width/dateCount)) + ',0)';
+                })
+                .selectAll('.trending')
+                .data(function (d) { return d.countries; })
+                .enter()
+                    .append('rect')
+                    .classed('trend', true)
+                    .attr('x', 0)
+                    .attr('width', dateWidth + 1)
+                    .attr('y', function (d) { return y(d.loc); })
+                    .attr('height', function (d) { return y.rangeBand(); })
+                    .attr('fill', function (d) { return color(d.rank); });
+                    
     }
 });
 
@@ -472,14 +505,17 @@ App.FullVideoView = Backbone.View.extend({
     template: _.template($('#yt-full-video-template').html()),
     initialize: function(){
         App.debug('Fetching info...');
-        _.bindAll(this,'onResultsReturned',
+        _.bindAll(this,'onFetchSuccess',
             'onClosing');
-        $.getJSON('/video/'+this.options.videoId+'/popularity.json',this.onResultsReturned);
+        var recentDays = this.options.recentDays || '0';
+        this.recent = new App.RecentVideoCollection({'recentDays':recentDays});
+        this.video = new App.Video({'id':this.options.videoId});
+        this.recent.add(this.video);
+        this.video.fetch({success:this.onFetchSuccess})
         $('#yt-progress-bar').show();
     },
-    onResultsReturned: function(data){
+    onFetchSuccess: function(){
         $('#yt-progress-bar').hide();
-        this.options.popularity = data;
         this.render();
         this.$el.on('hidden.bs.modal', this.onClosing);
         this.$el.modal();
@@ -503,17 +539,15 @@ App.FullVideoView = Backbone.View.extend({
         } else {
             t = "Who is Watching?"
         }
+        popular = this.video.mostPopular();
         var content = this.template({
             title: t,
             summary: s,
-            mostPopularCountry: ISO3166.getNameFromAlpha3(this.options.popularity.mostPopularCountry.code),
-            mostPopularDays: this.options.popularity.mostPopularCountry.days,
+            mostPopularCountry: popular.code,
+            mostPopularDays: popular.days,
             videoId: this.options.videoId
         });
         this.$el.html( content );
-        // render and add the attention-over-time plot
-        var attentionView = new App.VideoAttentionView({data: this.options.popularity.attentionByDate});
-        this.$('.yt-video-attention').html(attentionView.el);
         // render the map of global popularity
         this.projection = d3.geo.kavrayskiy7()
             .scale(125)
@@ -521,7 +555,7 @@ App.FullVideoView = Backbone.View.extend({
             .precision(.1);
         this.path = d3.geo.path()
             .projection(this.projection);
-        this.svg = d3.select(this.el).select('.modal-body').append("svg")
+        this.svg = d3.select(this.el).select('.yt-video-attention-map').append("svg")
             .attr("width", 560)
             .attr("height", 300);
         this.svg.append('g').attr('id', 'yt-background');
@@ -539,8 +573,9 @@ App.FullVideoView = Backbone.View.extend({
             .attr("class", 'yt-country')
             .attr("data-id",function(d){ return d.id })
             .attr("d", this.path);
+        var scores = this.video.countryScores();
         var colors = [];
-        $.each(this.options.popularity.countryScores, function (i, d) {
+        $.each(scores, function (i, d) {
             colors.push({id:ISO3166.getIdFromAlpha3(d.code), color:that.color(d.score)});
         });
         var countries = this.svg.select('#yt-data').selectAll('.yt-country')
@@ -561,6 +596,9 @@ App.FullVideoView = Backbone.View.extend({
         this.$el.on('hide.bs.modal',function(){
             $('div.modal-body').html("");
         });
+        // render and add the attention-over-time plot
+        var attentionView = new App.VideoAttentionView({video: this.video});
+        this.$('.yt-video-attention').html(attentionView.el);
     }
 });
 

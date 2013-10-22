@@ -53,6 +53,12 @@ app = Flask(__name__)
 def index():
     return render_template("base.html")
 
+@app.route("/data/recent/<recent_days>/video/<video_id>")
+def video(video_id, recent_days=0):
+    stats = ytrends.stats.Stats(stats_engine, recent_days)
+    log.info("Connected to db")
+    return json.dumps(stats.get_video_data(video_id))
+
 @app.route("/video/<video_id>/popularity.json")
 def video_popularity(video_id):
     stats = ytrends.stats.Stats(stats_engine)
@@ -80,5 +86,5 @@ def video_popularity(video_id):
 
 if __name__ == "__main__":
     app.debug = True
-    app.run()
+    app.run(host='0.0.0.0')
     log.info("Started Server")

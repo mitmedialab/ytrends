@@ -74,9 +74,10 @@
       <div class="modal-body">
         <p><%=summary%></p>
         <iframe width="560" height="315" src="http://www.youtube.com/embed/<%=videoId%>?rel=0" frameborder="0" allowfullscreen></iframe>
-        <div class="yt-video-attention"></div>
         <h4>Where was this trending?</h4>
+        <div class="yt-video-attention-map"></div>
         <!--<p>This was most popular in <%=mostPopularCountry%>, where it was on the top trending list for <%=mostPopularDays%> days.</p>-->
+        <div class="yt-video-attention"></div>
       </div>
     </div>
   </div>
@@ -114,7 +115,7 @@
 </script>
 <script type="text/template" id="yt-controls-template">
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-12" style="text-align:center">
       <div class="btn-group" data-toggle="buttons-radio">
         <button type="radio" class="btn btn-default" name="timespan" value="0">All time</button>
         <button type="radio" class="btn btn-default" name="timespan" value="7">Last 7 days</button>
