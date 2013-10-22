@@ -625,7 +625,7 @@ App.AlertView = Backbone.View.extend({
             .show();
         var that = this;
         App.globals.lastAlertTimeout = window.setTimeout(function() {
-            that.$el.fadeTo(200, 0);
+            that.$el.fadeTo(200, 0, function () { that.$el.css('display', 'none'); });
         }, 1000);
     }
 });
