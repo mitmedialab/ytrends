@@ -197,7 +197,7 @@ class Stats(object):
         # Filter by dates
         if self.days > 0:
             videos = videos.filter(Rank.date.in_(self.get_dates()))
-        return 
+        return videos
 
     def get_spread(self, video_id):
         '''
