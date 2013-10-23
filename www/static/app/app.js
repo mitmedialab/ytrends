@@ -5,7 +5,7 @@ window.App = {
     globals: {
         lastAlertTimeout: null,
         normalizeToGlobal: true,
-        writeLog: true,
+        writeLog: false,
         worldMap: null,
         countryIdToPath: {},
         colors: {

@@ -1,8 +1,10 @@
 from __future__ import division
 import math
 import sqlalchemy
+import time
 from datetime import date, timedelta
 from ytrends.db import *
+from ytrends.transform import *
 
 class Stats(object):
     '''
@@ -19,7 +21,7 @@ class Stats(object):
         self.engine = engine
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
-        self.days = days
+        self.days = int(days)
     
     def __del__(self):
         # Explicitly close session
@@ -161,6 +163,29 @@ class Stats(object):
         for rank in ranks:
             count_by_loc[rank[0]] = rank[1]
         return count_by_loc
+
+    def get_video_data(self, video_id):
+        '''
+        Return video object with metadata and attention footprint
+        '''
+        video = {
+            'id': video_id
+        }
+        ranks = self.session.query(Rank.loc, Rank.date, Rank.rank).\
+            filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+            filter_by(video_id=video_id).\
+            filter_by(source='view').\
+            order_by(Rank.date, Rank.loc)
+        # Filter by most recent days
+        if self.days > 0:
+            ranks = ranks.filter(Rank.date.in_(self.get_dates()))
+        loc_by_date = {}
+        for rank in ranks:
+            ts = time.mktime(rank[1].timetuple())
+            loc_by_date[ts] = loc_by_date.get(ts, [])
+            loc_by_date[ts].append({'loc': self.clean_loc(rank[0]), 'rank':rank[2]})
+        video['attention'] = dictToList(loc_by_date, 'date', 'countries')
+        return video
 
     def get_video_attention_by_day(self, video_id):
         results = self.session.query(sqlalchemy.sql.func.distinct(Rank.date)).\
