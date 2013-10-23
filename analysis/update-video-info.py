@@ -18,8 +18,14 @@ log = logging.getLogger('ytrends')
 log.info("---------------------------------------------------------------------------")
 
 # init the connection to the database
-stats = stats.Stats("mysql+mysqldb://"+config.get('db','user')+":"+config.get('db','pass')+
-    "@"+config.get('db','host')+"/"+config.get('db','name')+"?charset=utf8")
+stats_url = "mysql+mysqldb://%s:%s@%s/%s?charset=utf8" % (
+    config.get('db','user')
+    , config.get('db','pass')
+    , config.get('db','host')
+    , config.get('db','name')
+)
+stats_engine = sqlalchemy.create_engine(stats_url, echo=False, pool_size=100, pool_recycle=3600)
+stats = stats.Stats(stats_engine)
 log.info("Connected to db")
 
 # connect to youtube api
