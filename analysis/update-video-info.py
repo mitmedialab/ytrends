@@ -16,6 +16,7 @@ config.read(CONFIG_FILENAME)
 logging.basicConfig(filename='ytrends.log',level=logging.DEBUG)
 log = logging.getLogger('ytrends')
 log.info("---------------------------------------------------------------------------")
+log.info("Started to fetch new video metadata")
 
 # init the connection to the database
 stats_url = "mysql+mysqldb://%s:%s@%s/%s?charset=utf8" % (
