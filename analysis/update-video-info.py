@@ -37,13 +37,15 @@ log.info("Connected to youtube")
 
 # find videos that don't have metadata
 new_videos = stats.get_videos_without_metadata(MAX_VIDEOS_TO_PROCESS)
+log.info("  Found "+str(new_videos.count())+" that need to be processed")
 
+video_count =0
 for video in new_videos:
     video_id = video[0]
     viewable = None
     # query youtube
     try:
-        log.info("Fetching "+video_id)
+        log.info("  Fetching "+video_id)
         entry = yt_service.GetYouTubeVideoEntry(video_id=video_id)
         #PrintEntryDetails(entry)
         viewable = True
@@ -76,6 +78,7 @@ for video in new_videos:
     stats.session.add(v)
     stats.session.commit()
     log.info("  saved"+video_id)
+    video_count = video_count + 1
     time.sleep(1)
 
-log.info("Done!")
+log.info("Done! ("+str(video_count)+")")
