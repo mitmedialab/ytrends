@@ -6,7 +6,6 @@ import math
 from operator import itemgetter
 import sys
 
-import networkx as nx
 import sqlalchemy
 
 import ytrends.locations as locs
