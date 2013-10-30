@@ -9,7 +9,6 @@ import sys
 import sqlalchemy
 
 import ytrends.locations as locs
-import ytrends.graph as graph
 import ytrends.stats
 import ytrends.weights
 
