@@ -1,5 +1,6 @@
 from __future__ import division
 import math
+import random
 import sqlalchemy
 import time
 from datetime import date, timedelta
@@ -99,13 +100,20 @@ class Stats(object):
         # Filter by dates
         if self.days > 0:
             ranks = ranks.filter(Rank.date.in_(self.get_dates()))
-        # Create dict with counts (location -> video id -> count)
-        self.count_by_loc = {}
-        for rank in ranks:
-            videos = self.count_by_loc.get(self.clean_loc(rank[1]), {})
-            videos[rank[0]] = rank[2]
-            self.count_by_loc[self.clean_loc(rank[1])] = videos
+        self.count_by_loc = self._query_to_count_by_loc(ranks)
         return self.count_by_loc
+    
+    def _query_to_count_by_loc(self, query):
+        '''
+        Given a query result, create a dictionary mapping location to video id to count.
+        '''
+        # Create dict with counts (location -> video id -> count)
+        count_by_loc = {}
+        for rank in query:
+            videos = count_by_loc.get(self.clean_loc(rank[1]), {})
+            videos[rank[0]] = rank[2]
+            count_by_loc[self.clean_loc(rank[1])] = videos
+        return count_by_loc
 
     def get_videos(self):
         '''
@@ -239,3 +247,29 @@ class Stats(object):
             results[loc][date] = rank
         return results
     
+    def get_cv_count_by_loc(self, fold_count=10):
+        '''
+        Returns a list of pairs
+        '''
+        # Get list of dates and assign to folds of the same size
+        all_dates = [date[0].strftime('%Y-%m-%d') for date in self.session.query(sqlalchemy.distinct(Rank.date))]
+        random.shuffle(all_dates)
+        fold_size = int(math.floor(len(all_dates) / fold_count))
+        fold_dates = [all_dates[i:i+fold_size] for i in range(0, len(all_dates), fold_size)]
+        folds = []
+        for i in range(0, fold_count):
+            # Query ranks for all videos
+            ranks = self.session.query(Rank.video_id, Rank.loc, sqlalchemy.sql.func.count('*').label('entries')).\
+                filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+                filter_by(source='view').\
+                group_by(Rank.video_id, Rank.loc).\
+                filter(Rank.date.in_(sum([fold_dates[f] for f in range(0,fold_count) if f != i], [])))
+            training = self._query_to_count_by_loc(ranks)
+            ranks = self.session.query(Rank.video_id, Rank.loc, sqlalchemy.sql.func.count('*').label('entries')).\
+                filter(sqlalchemy.not_(Rank.loc.like('%all_%'))).\
+                filter_by(source='view').\
+                group_by(Rank.video_id, Rank.loc).\
+                filter(Rank.date.in_(fold_dates[i]))
+            test = self._query_to_count_by_loc(ranks)
+            folds.append((training, test))
+        return folds
